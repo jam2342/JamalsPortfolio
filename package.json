@@ -9,7 +9,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "build:pages": "BASE_PATH=/JamalsPortfolio SITE_URL=https://jam2342.github.io astro build && BASE_PATH=/JamalsPortfolio node scripts/base-rewrite.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
