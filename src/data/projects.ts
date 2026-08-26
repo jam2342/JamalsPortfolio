@@ -92,33 +92,8 @@ export const projects: Project[] = [
     featured: true,
   },
   {
-    id: "eaglets",
-    index: "03",
-    title: "Eaglets Robot Kits",
-    kind: "Robotics education program",
-    summary:
-      "Custom robot kits and curriculum that students in grades 3–8 can assemble, program, and debug in a single camp session.",
-    blurb:
-      "Eaglets is a student-run program that designs its own robot kits and teaches free camps for grades 3–8. As president, I am rebuilding the 2026–27 leadership team, training new officers, and preparing Kit V6 for testing and summer 2027 production. V6 remains under active development.",
-    years: "2024–present",
-    tags: ["Robotics", "Embedded", "Education", "Leadership"],
-    meta: [
-      { label: "Role", value: "President; former camp coordinator" },
-      { label: "Audience", value: "Grades 3–8" },
-      { label: "Hardware", value: "Raspberry Pi Pico; earlier Arduino" },
-    ],
-    stack: [
-      { group: "Hardware", items: ["Raspberry Pi Pico", "Arduino Uno", "HC-SR04 ultrasonic", "Photoresistor", "Motor drivers"] },
-      { group: "Software", items: ["Python", "C++", "Beginner-facing libraries"] },
-      { group: "Program", items: ["Curriculum design", "Camp operations", "Leadership recruiting", "Grants and partnerships"] },
-    ],
-    href: "/work/eaglets/",
-    privateRepo: false,
-    featured: true,
-  },
-  {
     id: "cryptography",
-    index: "04",
+    index: "03",
     title: "Practical Cryptography",
     kind: "Course and assessment design",
     summary:
@@ -138,6 +113,32 @@ export const projects: Project[] = [
     ],
     href: "/work/cryptography/",
     privateRepo: true,
+    featured: true,
+  },
+  {
+    id: "eaglets",
+    index: "04",
+    title: "Eaglets Robotics",
+    kind: "Free robotics camps, grades 3–8",
+    summary:
+      "A student-run program running free robotics camps for grades 3–8. I run the program; the kits are the club's own design lineage.",
+    blurb:
+      "Eaglets teaches free build-and-program camps for grades 3–8, using robot kits the club has developed across several revisions. I did not design those kits. I run the program: camps, curriculum, officer training, and the logistics that keep the sessions free. Right now that means rebuilding the 2026–27 leadership team and getting the current kit ready for the summer run.",
+    years: "2024–present",
+    tags: ["Robotics", "Embedded", "Education", "Leadership"],
+    meta: [
+      { label: "Role", value: "President — camps, curriculum, officer training" },
+      { label: "Kit design", value: "Club lineage; not my work" },
+      { label: "Audience", value: "Grades 3–8" },
+      { label: "Hardware", value: "Raspberry Pi Pico; earlier Arduino" },
+    ],
+    stack: [
+      { group: "Kit hardware (club design)", items: ["Raspberry Pi Pico", "Arduino Uno", "HC-SR04 ultrasonic", "Photoresistor", "Motor drivers"] },
+      { group: "Kit software (club design)", items: ["Python", "C++", "Beginner-facing libraries"] },
+      { group: "What I run", items: ["Curriculum design", "Camp operations", "Officer training", "Leadership recruiting", "Grants and partnerships"] },
+    ],
+    href: "/work/eaglets/",
+    privateRepo: false,
     featured: true,
   },
   {

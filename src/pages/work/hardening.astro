@@ -2,6 +2,7 @@
 import Base from "../../layouts/Base.astro";
 import HardeningLab from "../../components/HardeningLab.astro";
 import EvidenceStrip from "../../components/EvidenceStrip.astro";
+import Figure from "../../components/Figure.astro";
 import { projects } from "../../data/projects";
 
 const project = projects.find((p) => p.id === "cyberpatriot")!;
@@ -92,6 +93,15 @@ const project = projects.find((p) => p.id === "cyberpatriot")!;
         makes the destructive mistake faster and across more of the system at
         once.
       </p>
+
+      <Figure
+        src="/img/hardening/powershell-firewall-errors.jpg"
+        alt="A PowerShell console during a CyberPatriot round, filled with repeated red Set-NetFirewallProfile errors reading 'There are no more endpoints available from the endpoint mapper'."
+        label="Plate 01 — competition machine, 14 Dec 2025"
+        caption="What that looks like in practice. Set-NetFirewallProfile failing repeatedly with Windows System Error 1753 because the endpoint mapper had been tampered with on the image. The run keeps going and logs the failure rather than stopping, which is the behaviour the framework is built around."
+        width={1100}
+        height={564}
+      />
     </section>
 
     <section class="wrap section narrow" aria-labelledby="approach">
@@ -205,6 +215,34 @@ const project = projects.find((p) => p.id === "cyberpatriot")!;
       </div>
     </section>
 
+    <section class="wrap section narrow" aria-labelledby="howitwent">
+      <h2 class="h-lg sec-title" id="howitwent">How it went</h2>
+
+      <p>
+        Bravo Prime reached the CyberPatriot XVIII National Semifinals, held
+        online from 22 to 24 January 2026. After the opening day we were sitting
+        15th in the nation within Open Division, Platinum tier.
+      </p>
+
+      <p class="note">
+        Two things about that 15th. It was scoped to Open Division, Platinum
+        tier, not to every team in the competition. And it was a first-day
+        standing, not a final placement, because scores move a lot over the
+        remaining rounds and ours did too. The screenshot below is one
+        leaderboard on one morning. It is here because it is real, not because
+        it is where we finished.
+      </p>
+
+      <Figure
+        src="/img/cyberpatriot/opening-day-standings.jpg"
+        alt="A CyberPatriot leaderboard extract showing row 15, team 18-4257, Texas, Open Division, Platinum tier."
+        label="Plate 02 — opening-day standings, National Semifinals"
+        caption="Row 15 is us: team 18-4257, Texas, Open Division, Platinum tier. Opening day of the National Semifinals only."
+        width={1896}
+        height={632}
+      />
+    </section>
+
     <section class="wrap section narrow" aria-labelledby="scale">
       <h2 class="h-lg sec-title" id="scale">On the size of it</h2>
 
@@ -247,7 +285,7 @@ const project = projects.find((p) => p.id === "cyberpatriot")!;
     <nav class="wrap section case-next" aria-label="More work">
       <a href="/work/eaglets/" class="next-link">
         <span class="mono">Next case study</span>
-        <span class="h-md">Eaglets Robot Kits →</span>
+        <span class="h-md">Eaglets Robotics →</span>
       </a>
     </nav>
   </article>

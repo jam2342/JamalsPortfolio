@@ -41,6 +41,7 @@ export const roles: Role[] = [
     ],
     teamCredits: [
       "CyberPatriot XVIII Open Division National Semifinalist (January 2026)",
+      "15th nationally in Open Division, Platinum tier, after the opening day of the CyberPatriot XVIII National Semifinals. That was a first-day standing only; it is not where the team finished.",
     ],
   },
   {
@@ -121,7 +122,7 @@ export const competitions: Competition[] = [
     result: "National Semifinalist",
     year: "2026",
     detail:
-      "Open Division National Semifinals, held online 22 to 24 January 2026, with team Bravo Prime. Windows and Windows Server hardening against the clock. This is where the automation framework came from.",
+      "Open Division National Semifinals, held online 22 to 24 January 2026, with team Bravo Prime. Windows and Windows Server hardening against the clock. After the opening day we sat 15th nationally within Open Division, Platinum tier, though that was a first-day standing rather than a final placement. This is where the automation framework came from.",
   },
   {
     name: "Stanford Math Tournament",

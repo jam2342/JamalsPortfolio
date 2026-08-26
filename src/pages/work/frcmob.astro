@@ -3,6 +3,7 @@ import Base from "../../layouts/Base.astro";
 import FieldTracker from "../../components/FieldTracker.astro";
 import Pipeline from "../../components/Pipeline.astro";
 import ModelMetrics from "../../components/ModelMetrics.astro";
+import RecallGrid from "../../components/RecallGrid.astro";
 import Figure from "../../components/Figure.astro";
 import EvidenceStrip from "../../components/EvidenceStrip.astro";
 import { projects } from "../../data/projects";
@@ -292,6 +293,11 @@ const visionStages = [
           the training data. It measures whether the model learned the frames it
           was shown. It says very little about a competition it has never seen.
         </p>
+      </div>
+
+      <RecallGrid />
+
+      <div class="narrow">
 
         <p>
           So one full event, {detector.holdoutEvent}, was held out entirely and

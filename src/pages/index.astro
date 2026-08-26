@@ -1,156 +1,187 @@
 ---
+/**
+ * Homepage.
+ *
+ * Deliberately not a stack of equal centred sections. The rhythm goes:
+ * asymmetric hero with a pinned record rail → full-bleed instrument →
+ * staggered areas → horizontal work rail → offset competition split.
+ * Each block uses a different container and a different column structure.
+ */
 import Base from "../layouts/Base.astro";
-import ProjectCard from "../components/ProjectCard.astro";
 import FieldTracker from "../components/FieldTracker.astro";
-import { site } from "../data/site";
 import CtfBreakdown from "../components/CtfBreakdown.astro";
-import EvidenceStrip from "../components/EvidenceStrip.astro";
-import { featuredProjects } from "../data/projects";
+import { site } from "../data/site";
+import { projects } from "../data/projects";
 import { competitions } from "../data/experience";
 
 const ctf = competitions.find((c) => c.breakdown)!;
 const others = competitions.filter((c) => !c.breakdown);
+
+const areas = [
+  {
+    n: "01",
+    title: "Computer vision for robotics",
+    body: "Detection, multi-object tracking, and field-coordinate mapping on match video. Footage becomes positions and cycles a person can check.",
+  },
+  {
+    n: "02",
+    title: "Security automation",
+    body: "Audit machine state, apply policy against a baseline, record every change, and keep a way back when something breaks.",
+  },
+  {
+    n: "03",
+    title: "Teaching hardware",
+    body: "Running camps where a nine-year-old has forty minutes, a bag of parts, and an adult who has never seen a breadboard.",
+  },
+  {
+    n: "04",
+    title: "Stochastic calculus",
+    body: "How far Itô gets you before exact answers run out, plus a capacitor investigation whose data disagreed with my hypothesis.",
+  },
+];
 ---
 
 <Base title="Jamal Mammadzada, student researcher and engineer">
-  <section class="hero">
-    <div class="wrap hero-inner">
+  <!-- 1. Asymmetric hero: headline left, record pinned right -->
+  <section class="hero wrap">
+    <div class="hero-main">
       <p class="mono hero-kicker">
-        {site.school} · Class of {site.graduation.split(" ")[1]} · {site.location}
+        {site.school} · Class of 2027 · {site.location}
       </p>
 
-      <h1 class="h-xl hero-title">
-        I build technical systems<br />that have to work<br />
-        <span class="hero-em">beyond the demo.</span>
+      <h1 class="hero-title">
+        Computer vision, security automation,<br />and robots for kids who've<br
+        /><span class="hero-em">never soldered.</span>
       </h1>
 
-      <div class="hero-body">
-        <p class="lede">
-          I'm a student researcher and engineer working on machine learning,
-          robotics, security, and technical education. Most of what I build ends
-          up in someone else's hands. A strategy team reading match analysis
-          between rounds. A competition image that has to survive being hardened
-          in under an hour. A ten-year-old assembling a robot for the first time.
-          That constraint shapes the engineering more than anything else does.
-        </p>
+      <p class="lede hero-lede">
+        FRCMOB is the big one. It reads match footage, tracks every robot on the
+        field, and converts what a phone camera saw from row 20 into field
+        coordinates a strategy team can argue about between rounds. Team 5417
+        runs it at competition. The whole thing is open source.
+      </p>
 
-        <div class="hero-actions">
-          <a href="/work/" class="btn">Selected work</a>
-          <a href={site.resume} class="btn btn-ghost">Résumé (PDF)</a>
-        </div>
+      <p class="hero-body">
+        Everything else is smaller and a bit stranger. There is an 11,900-line
+        PowerShell framework that hardens Windows boxes and can undo every change
+        it made. There is a cryptography course whose final project ships with
+        real defects planted in it, so students have to audit it and decide
+        whether it releases. And I run Eaglets, a club that teaches free robotics
+        camps for grades 3 through 8.
+      </p>
+
+      <div class="hero-actions">
+        <a href="/work/frcmob/" class="btn">How FRCMOB works</a>
+        <a href="/work/" class="btn btn-ghost">All six projects</a>
       </div>
     </div>
 
-    <div class="hero-rule" aria-hidden="true"></div>
+    <aside class="hero-rail">
+      <div class="record">
+        <div class="record-head">
+          <p class="mono">Record</p>
+          <p class="mono live">Verified</p>
+        </div>
+        <div class="rail-grid">
+          <div>
+            <p class="record-v">6,540</p>
+            <p class="mono record-k">Frames labeled</p>
+            <p class="record-d">1,683 reviewed by hand</p>
+          </div>
+          <div>
+            <p class="record-v">70 / 70</p>
+            <p class="mono record-k">picoCTF 2026</p>
+            <p class="record-d">Every challenge · #68 worldwide</p>
+          </div>
+          <div>
+            <p class="record-v">11,900</p>
+            <p class="mono record-k">Lines of PowerShell</p>
+            <p class="record-d">Audit and rollback engine</p>
+          </div>
+          <div>
+            <p class="record-v">Semis</p>
+            <p class="mono record-k">CyberPatriot XVIII</p>
+            <p class="record-d">Open Division national semifinalist</p>
+          </div>
+        </div>
+      </div>
+    </aside>
   </section>
 
-  <section class="proof-band wrap" aria-label="Selected evidence">
-    <EvidenceStrip
-      label="Selected evidence"
-      items={[
-        { value: "6,540", label: "FRCMOB labeled frames", detail: "1,683 manually reviewed" },
-        { value: "~11,900", label: "PowerShell lines", detail: "Auditing, remediation, and rollback" },
-        { value: "70 / 70", label: "picoCTF challenges", detail: "Two-person team · #68 worldwide" },
-        { value: "Grades 3–8", label: "Eaglets audience", detail: "Free, build-and-program robotics camps" },
-      ]}
-    />
-  </section>
+  <!-- 2. Full-bleed instrument: escapes the container entirely -->
+  <section class="bleed" aria-labelledby="tracker-head">
+    <div class="bleed-inner">
+      <div class="bleed-head">
+        <p class="mono" id="tracker-head">Fig. 01 — the core problem, drawn</p>
+        <p class="bleed-note">
+          A camera in the stands sees a flat, foreshortened image. Strategy
+          questions are about the field. Getting between the two is a calibration
+          problem, and everything else in FRCMOB sits on top of it.
+        </p>
+      </div>
 
-  <section class="section wrap" aria-labelledby="focus">
-    <div class="rubric">
-      <p class="mono" id="focus">Areas</p>
+      <FieldTracker />
+
+      <p class="bleed-more">
+        <a href="/work/frcmob/" class="arrow">How the full pipeline works</a>
+      </p>
     </div>
+  </section>
 
-    <ul class="focus-grid" role="list">
-      <li class="reveal">
-        <p class="focus-n mono">01</p>
-        <h2 class="h-sm">Computer vision for robotics</h2>
-        <p>
-          Detection, multi-object tracking, and field-coordinate mapping applied
-          to competition match video, turning footage into positions, cycles, and
-          trajectories a person can check.
-        </p>
-      </li>
-      <li class="reveal">
-        <p class="focus-n mono">02</p>
-        <h2 class="h-sm">Security automation</h2>
-        <p>
-          Systems that audit machine state, apply policy against a baseline, and
-          record exactly what changed, with a way back if something breaks.
-        </p>
-      </li>
-      <li class="reveal">
-        <p class="focus-n mono">03</p>
-        <h2 class="h-sm">Embedded and educational hardware</h2>
-        <p>
-          Microcontroller robot kits and the beginner-facing libraries that make
-          them teachable to students in grades 3–8.
-        </p>
-      </li>
-      <li class="reveal">
-        <p class="focus-n mono">04</p>
-        <h2 class="h-sm">Mathematics and physics research</h2>
-        <p>
-          An extended essay on how far Itô calculus gets you when solving
-          stochastic differential equations, and a completed investigation into
-          temperature and capacitor discharge.
-        </p>
-      </li>
+  <!-- 3. Staggered areas: offset columns, not four equal cards -->
+  <section class="areas wrap" aria-labelledby="areas-head">
+    <h2 class="mono areas-label" id="areas-head">What I keep coming back to</h2>
+    <ul class="areas-list" role="list">
+      {areas.map((a) => (
+        <li class="area reveal">
+          <p class="mono area-n">{a.n}</p>
+          <h3 class="area-t">{a.title}</h3>
+          <p class="area-b">{a.body}</p>
+        </li>
+      ))}
     </ul>
   </section>
 
-  <section class="section wrap" aria-labelledby="tracker-head">
-    <div class="rubric">
-      <p class="mono" id="tracker-head">The core problem, drawn</p>
+  <!-- 4. Horizontal rail: work scrolls sideways instead of stacking -->
+  <section class="rail-sec" aria-labelledby="work-head">
+    <div class="wrap rail-head">
+      <h2 class="mono" id="work-head">Selected work</h2>
+      <a href="/work/" class="arrow">Open the explorer</a>
     </div>
 
-    <p class="narrow lede tracker-intro">
-      A camera in the stands sees a flat, foreshortened image. Strategy questions
-      are about the field: who held which zone, how long a cycle took, where a
-      robot actually spent the match. Getting from one to the other is a
-      calibration problem, and it's the piece everything else in FRCMOB depends on.
-    </p>
-
-    <FieldTracker />
-
-    <p class="narrow">
-      <a href="/work/frcmob/" class="arrow">How the full pipeline works</a>
-    </p>
+    <ul class="strip" role="list">
+      {projects.map((p) => (
+        <li class="strip-card">
+          <a href={p.href ?? "/work/"}>
+            <p class="mono strip-n">{p.index}</p>
+            <h3 class="strip-t">{p.title}</h3>
+            <p class="mono strip-k">{p.kind}</p>
+            <p class="strip-s">{p.summary}</p>
+            <p class="mono strip-y">{p.years}</p>
+          </a>
+        </li>
+      ))}
+    </ul>
   </section>
 
-  <section class="section wrap" aria-labelledby="work-head">
-    <div class="rubric">
-      <p class="mono" id="work-head">Selected work</p>
+  <!-- 5. Offset split: competitions sit against a sticky caption -->
+  <section class="comp-sec wrap" aria-labelledby="comp-head">
+    <div class="comp-aside">
+      <h2 class="mono" id="comp-head">Competitions</h2>
+      <p class="comp-note">
+        Two of us cleared every picoCTF challenge. The CyberPatriot run is where
+        the hardening framework came from.
+      </p>
     </div>
 
-    <div class="cards">
-      {
-        featuredProjects.map((p, i) => (
-          <ProjectCard project={p} lead={i === 0} />
-        ))
-      }
-    </div>
+    <div class="comp-main">
+      <div class="reveal"><CtfBreakdown comp={ctf} /></div>
 
-    <p class="cards-more">
-      <a href="/work/" class="arrow">All projects</a>
-    </p>
-  </section>
-
-  <section class="section wrap" aria-labelledby="comp-head">
-    <div class="rubric">
-      <p class="mono" id="comp-head">Competitions</p>
-    </div>
-
-    <div class="reveal ctf-wrap">
-      <CtfBreakdown comp={ctf} />
-    </div>
-
-    <ul class="comp-list" role="list">
-      {
-        others.map((c) => (
+      <ul class="comp-list" role="list">
+        {others.map((c) => (
           <li class="comp reveal">
-            <div class="comp-main">
-              <h2 class="h-sm">{c.name}</h2>
+            <div>
+              <h3 class="h-sm">{c.name}</h3>
               <p class="comp-detail">{c.detail}</p>
             </div>
             <div class="comp-side">
@@ -158,204 +189,251 @@ const others = competitions.filter((c) => !c.breakdown);
               {c.year && <p class="mono">{c.year}</p>}
             </div>
           </li>
-        ))
-      }
-    </ul>
+        ))}
+      </ul>
+    </div>
   </section>
 
-  <section class="section wrap">
-    <div class="closing reveal">
-      <h2 class="h-lg">Open to research programs, internships, and collaboration.</h2>
-      <p class="lede closing-body">
-        If you're working on machine learning, robotics, security, or technical
-        education and think there's overlap, I'd like to hear about it.
-      </p>
-      <div class="hero-actions">
-        <a href={`mailto:${site.email}`} class="btn">{site.email}</a>
-        <a href="/contact/" class="btn btn-ghost">Contact</a>
-      </div>
+  <section class="closing wrap">
+    <h2 class="h-lg">Open to research programs, internships, and collaboration.</h2>
+    <p class="lede closing-body">
+      If you're working on machine learning, robotics, security, or technical
+      education and think there's overlap, I'd like to hear about it.
+    </p>
+    <div class="hero-actions">
+      <a href={`mailto:${site.email}`} class="btn">{site.email}</a>
+      <a href="/contact/" class="btn btn-ghost">Contact</a>
     </div>
   </section>
 </Base>
 
 <style>
+  /* ---------- 1. hero ---------- */
   .hero {
-    padding-top: clamp(3.5rem, 9vw, 7rem);
-    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: start;
+    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+    padding-bottom: clamp(2.5rem, 5vw, 4rem);
   }
 
-  .hero-kicker {
-    margin: 0 0 1.75rem;
-  }
+  .hero-kicker { margin: 0 0 1.4rem; }
 
   .hero-title {
-    margin-bottom: 2.25rem;
+    font-size: clamp(1.9rem, 4vw, 3.1rem);
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    font-weight: 600;
   }
 
-  .hero-em {
-    color: var(--accent);
-  }
+  .hero-em { color: var(--accent); }
+
+  .hero-lede { margin: 1.6rem 0 0; max-width: 56ch; }
 
   .hero-body {
-    display: grid;
-    grid-template-columns: minmax(0, 62ch);
-    gap: 2rem;
-    /* Indent the body under the headline's optical column. */
-    margin-left: clamp(0rem, 6vw, 5rem);
+    margin: 1.1rem 0 0;
+    max-width: 56ch;
+    color: var(--ink-2);
+    font-size: 0.95rem;
   }
 
   .hero-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.7rem;
+    margin-top: 1.9rem;
   }
 
-  .hero-rule {
-    margin-top: var(--step);
-    height: 1px;
-    background: var(--rule);
+  /* The rail sticks while the hero copy scrolls past it. */
+  .hero-rail { position: sticky; top: 5.5rem; }
+
+  .rail-grid { display: grid; }
+
+  .rail-grid > div {
+    padding: 0.85rem 1rem 0.95rem;
+    border-bottom: 1px solid var(--rule);
   }
 
-  .proof-band {
-    padding-top: clamp(2.2rem, 5vw, 3.8rem);
+  .rail-grid > div:last-child { border-bottom: 0; }
+
+  /* ---------- 2. full-bleed ---------- */
+  .bleed {
+    /* Escapes the page container: this is the rhythm break. */
+    width: 100vw;
+    margin-left: 50%;
+    transform: translateX(-50%);
+    background: var(--paper-2);
+    border-block: 1px solid var(--rule);
+    padding-block: clamp(2.2rem, 5vw, 3.6rem);
   }
 
-  /* -- Areas -- */
+  .bleed-inner {
+    max-width: 1500px;
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
 
-  .focus-grid {
+  .bleed-head {
+    display: grid;
+    grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
+    gap: clamp(1rem, 3vw, 3rem);
+    align-items: start;
+    margin-bottom: 1.6rem;
+  }
+
+  .bleed-note {
+    margin: 0;
+    max-width: 62ch;
+    color: var(--ink-2);
+    font-size: 0.95rem;
+  }
+
+  .bleed-more { margin: 1.4rem 0 0; }
+
+  /* ---------- 3. staggered areas ---------- */
+  .areas { padding-block: clamp(3rem, 7vw, 5rem); }
+
+  .areas-label { margin-bottom: 2rem; }
+
+  .areas-list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-    gap: 2.5rem 2rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.6rem;
+    align-items: start;
   }
 
-  .focus-grid li {
-    border-top: 1px solid var(--rule);
-    padding-top: 1rem;
+  /* Each column drops a little further than the last, so the row reads as a
+     descending stagger rather than four identical boxes. */
+  .area { border-top: 2px solid var(--ink); padding-top: 0.9rem; }
+  .areas-list > li:nth-child(2) { margin-top: 2.4rem; }
+  .areas-list > li:nth-child(3) { margin-top: 4.8rem; }
+  .areas-list > li:nth-child(4) { margin-top: 7.2rem; }
+
+  .area-n { margin: 0 0 0.7rem; color: var(--accent); font-size: 0.66rem; }
+  .area-t { font-size: 1.02rem; margin-bottom: 0.5rem; }
+  .area-b { margin: 0; font-size: 0.88rem; color: var(--ink-2); line-height: 1.55; }
+
+  /* ---------- 4. horizontal rail ---------- */
+  .rail-sec { padding-block: clamp(2rem, 5vw, 3.5rem); }
+
+  .rail-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.3rem;
   }
 
-  .focus-n {
-    margin: 0 0 0.85rem;
-    color: var(--accent);
-    font-size: 0.68rem;
-  }
-
-  .focus-grid h2 {
-    margin-bottom: 0.6rem;
-  }
-
-  .focus-grid p {
-    font-size: 0.94rem;
-    color: var(--ink-2);
-    margin: 0;
-  }
-
-  /* -- Tracker -- */
-
-  .tracker-intro {
-    margin-bottom: 0;
-  }
-
-  /* -- Cards -- */
-
-  .cards {
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .cards-more {
-    margin-top: 1.75rem;
-  }
-
-  /* -- Competitions -- */
-
-  .ctf-wrap {
-    margin-bottom: 2.25rem;
-  }
-
-  .comp-list {
+  .strip {
     list-style: none;
     margin: 0;
-    padding: 0;
+    /* Align the first card with .wrap's content edge while still letting the
+       rail run off the right of the screen. */
+    padding-inline: max(var(--gutter), calc((100% - var(--page)) / 2 + var(--gutter)));
+    padding-bottom: 0.6rem;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(15.5rem, 17rem);
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    /* Snap targets align to the snapport edge, which ignores padding and left
+       the rail auto-scrolled by exactly the inline padding. scroll-padding
+       moves the snapport in to match. */
+    scroll-padding-inline: max(var(--gutter), calc((100% - var(--page)) / 2 + var(--gutter)));
+    scrollbar-width: thin;
   }
+
+  .strip-card { scroll-snap-align: start; }
+
+  .strip-card a {
+    display: block;
+    height: 100%;
+    text-decoration: none;
+    border: 1px solid var(--rule);
+    background: var(--paper-2);
+    padding: 0.9rem 1rem 1.1rem;
+    transition: border-color 0.16s ease, transform 0.16s ease;
+  }
+
+  .strip-card a:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .strip-n { margin: 0; color: var(--accent); font-size: 0.64rem; }
+  .strip-t { font-size: 1.08rem; margin: 0.55rem 0 0.2rem; }
+  .strip-k { margin: 0; font-size: 0.6rem; text-transform: none; letter-spacing: 0.04em; }
+  .strip-s { margin: 0.7rem 0 0; font-size: 0.85rem; color: var(--ink-2); line-height: 1.5; }
+  .strip-y { margin: 0.9rem 0 0; font-size: 0.6rem; }
+
+  /* ---------- 5. offset competition split ---------- */
+  .comp-sec {
+    display: grid;
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: start;
+    padding-block: clamp(3rem, 7vw, 5rem);
+  }
+
+  .comp-aside { position: sticky; top: 5.5rem; }
+
+  .comp-note {
+    margin: 0.9rem 0 0;
+    font-size: 0.88rem;
+    color: var(--ink-2);
+    line-height: 1.55;
+  }
+
+  .comp-list { list-style: none; margin: 2rem 0 0; padding: 0; }
 
   .comp {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 1.5rem;
     align-items: start;
-    padding: 1.35rem 0;
+    padding: 1.15rem 0;
     border-top: 1px solid var(--rule);
   }
 
-  .comp:last-child {
-    border-bottom: 1px solid var(--rule);
-  }
+  .comp:last-child { border-bottom: 1px solid var(--rule); }
+  .comp-detail { margin: 0.4rem 0 0; color: var(--ink-2); font-size: 0.9rem; max-width: 58ch; }
+  .comp-side { text-align: right; }
+  .comp-result { margin: 0; font-weight: 600; font-size: 0.92rem; color: var(--accent); }
+  .comp-side .mono { margin: 0.2rem 0 0; font-size: 0.62rem; }
 
-  .comp-detail {
-    margin: 0.45rem 0 0;
-    color: var(--ink-2);
-    font-size: 0.94rem;
-    max-width: 58ch;
-  }
-
-  .comp-areas {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    margin: 0.85rem 0 0;
-    padding: 0;
-  }
-
-  .comp-side {
-    text-align: right;
-  }
-
-  .comp-result {
-    margin: 0;
-    font-weight: 560;
-    font-size: 0.95rem;
-    color: var(--accent);
-  }
-
-  .comp-side .mono {
-    margin: 0.25rem 0 0;
-    font-size: 0.66rem;
-  }
-
-  /* -- Closing -- */
-
+  /* ---------- closing ---------- */
   .closing {
     border-top: 1px solid var(--rule);
-    padding-top: 2.5rem;
-    max-width: 58ch;
+    padding-block: clamp(2.5rem, 5vw, 3.5rem) clamp(3rem, 6vw, 4.5rem);
+    max-width: 60ch;
   }
 
-  .closing-body {
-    margin: 1.1rem 0 1.9rem;
+  .closing-body { margin: 1rem 0 1.7rem; }
+
+  @media (max-width: 1000px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-rail { position: static; }
+    .rail-grid { grid-template-columns: repeat(2, 1fr); }
+    .rail-grid > div:nth-child(odd) { border-right: 1px solid var(--rule); }
+    .areas-list { grid-template-columns: repeat(2, 1fr); }
+    .areas-list > li:nth-child(n) { margin-top: 0; }
+    .areas-list > li:nth-child(2) { margin-top: 2.4rem; }
+    .areas-list > li:nth-child(4) { margin-top: 2.4rem; }
+    .bleed-head { grid-template-columns: 1fr; gap: 0.6rem; }
+    .comp-sec { grid-template-columns: 1fr; }
+    .comp-aside { position: static; }
   }
 
-  @media (max-width: 640px) {
-    .hero-body {
-      margin-left: 0;
-    }
-
-    .comp {
-      grid-template-columns: 1fr;
-      gap: 0.75rem;
-    }
-
-    .comp-side {
-      text-align: left;
-      display: flex;
-      align-items: baseline;
-      gap: 0.7rem;
-    }
-
-    .comp-side .mono {
-      margin: 0;
-    }
+  @media (max-width: 620px) {
+    .areas-list { grid-template-columns: 1fr; }
+    .areas-list > li:nth-child(n) { margin-top: 0; }
+    .comp { grid-template-columns: 1fr; gap: 0.6rem; }
+    .comp-side { text-align: left; display: flex; gap: 0.7rem; align-items: baseline; }
+    .comp-side .mono { margin: 0; }
   }
 </style>

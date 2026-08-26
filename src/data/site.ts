@@ -7,7 +7,7 @@ export const site = {
   name: "Jamal Mammadzada",
   role: "Student researcher and engineer",
   location: "Allen, Texas",
-  email: "Jamalmamamdzada13@gmail.com",
+  email: "jamalmammadzada13@gmail.com",
   github: "jam2342",
   githubUrl: "https://github.com/jam2342",
   // Deliberately not shown on the homepage. Contact page + resume only.

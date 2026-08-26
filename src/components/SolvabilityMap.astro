@@ -1,0 +1,418 @@
+---
+/**
+ * Where closed-form solvability runs out.
+ *
+ * The four families from the paper, placed on two axes that actually decide
+ * whether an exact solution exists: how the drift depends on the state, and
+ * how the diffusion does. Selecting a family shows the method that works, or
+ * the exact step where it fails.
+ *
+ * The claim each panel makes is about *pathwise closed form in elementary
+ * functions*, not about whether the process is understood — CIR has a known
+ * transition density, it just has no explicit solution path. The captions say
+ * so, because conflating the two would overstate the result.
+ */
+import Math from "./Math.astro";
+
+type Family = {
+  id: string;
+  name: string;
+  short: string;
+  /** Map position, 0–100 in each axis. */
+  x: number;
+  y: number;
+  solved: boolean;
+  verdict: string;
+  method: string;
+  /** The move that unlocks it, or the move that fails. */
+  step: string;
+  note: string;
+};
+
+const families: Family[] = [
+  {
+    id: "gbm",
+    name: "Geometric Brownian motion",
+    short: "GBM",
+    x: 26,
+    y: 62,
+    solved: true,
+    verdict: "Closed form",
+    method: "Itô's formula applied to log X",
+    step:
+      "The drift and diffusion are both linear in X, so taking logs turns the equation into one with constant coefficients. Itô's correction contributes the −σ²⁄2 term, and the result integrates directly.",
+    note: "The correction term is the whole reason this is not just the ODE answer.",
+  },
+  {
+    id: "ou",
+    name: "Ornstein–Uhlenbeck",
+    short: "OU",
+    x: 20,
+    y: 20,
+    solved: true,
+    verdict: "Closed form",
+    method: "Integrating factor e^{θt}",
+    step:
+      "Additive noise means the diffusion never involves X, so the equation is linear and the deterministic integrating factor still works. What is left is a Wiener integral, which is Gaussian with a variance you can write down.",
+    note: "Solvable in the strongest sense here: an explicit path and an explicit distribution.",
+  },
+  {
+    id: "logistic",
+    name: "Stochastic logistic",
+    short: "Logistic",
+    x: 78,
+    y: 62,
+    solved: true,
+    verdict: "Closed form",
+    method: "Bernoulli substitution Y = 1/X",
+    step:
+      "The drift is nonlinear, which looks fatal, but it is nonlinear in the one way that helps: substituting Y = 1/X linearises it, and the transformed equation solves like GBM with an extra integral term.",
+    note: "Nonlinear drift is survivable. Nonlinear diffusion is the one that is not.",
+  },
+  {
+    id: "cir",
+    name: "Cox–Ingersoll–Ross",
+    short: "CIR",
+    x: 24,
+    y: 90,
+    solved: false,
+    verdict: "No closed form",
+    method: "Every route above fails",
+    step:
+      "The √X diffusion is the break. Logs do not separate it, no integrating factor absorbs it, and no substitution linearises it. The coefficient is also not Lipschitz at X = 0, so the standard existence-and-uniqueness argument does not even apply near the boundary.",
+    note:
+      "Its transition density is still known exactly, as a noncentral chi-squared. Knowing the distribution and having a solution are different things, and this family is the reason that distinction matters.",
+  },
+];
+---
+
+<figure class="solv" data-solv>
+  <div class="solv-head">
+    <p class="mono">Fig. 03 · Where exact solutions run out</p>
+    <p class="solv-sub">
+      Four families, placed by what their drift and diffusion depend on. Select
+      one.
+    </p>
+  </div>
+
+  <div class="solv-body">
+    <!-- The map -->
+    <div class="map-wrap">
+      <svg
+        class="map"
+        viewBox="0 0 340 300"
+        role="group"
+        aria-label="A map of four stochastic differential equation families, plotted by drift and diffusion dependence."
+      >
+        <!-- grid -->
+        <g class="grid" aria-hidden="true">
+          <line x1="46" y1="16" x2="46" y2="252"></line>
+          <line x1="46" y1="252" x2="324" y2="252"></line>
+          <line x1="185" y1="16" x2="185" y2="252" class="faint"></line>
+          <line x1="46" y1="134" x2="324" y2="134" class="faint"></line>
+        </g>
+
+        <!-- axis labels -->
+        <text class="ax" x="46" y="272">linear drift</text>
+        <text class="ax ax-end" x="324" y="272">nonlinear drift</text>
+        <text class="ax ax-rot" transform="translate(30,252) rotate(-90)">additive noise</text>
+        <text class="ax ax-rot ax-end" transform="translate(30,16) rotate(-90)">state-dependent noise</text>
+
+        {families.map((f) => {
+          const cx = 46 + (f.x / 100) * 278;
+          const cy = 252 - (f.y / 100) * 236;
+          return (
+            <g
+              class:list={["node", { unsolved: !f.solved }]}
+              data-node={f.id}
+              tabindex="0"
+              role="button"
+              aria-label={`${f.name}. ${f.verdict}.`}
+              aria-pressed="false"
+            >
+              <circle class="halo" cx={cx} cy={cy} r="17"></circle>
+              <circle class="dot" cx={cx} cy={cy} r="7"></circle>
+              <text class="node-t" x={cx} y={cy - 22}>{f.short}</text>
+            </g>
+          );
+        })}
+      </svg>
+
+      <p class="map-key mono">
+        <span class="key k-ok"></span> closed form
+        <span class="key k-no"></span> none
+      </p>
+    </div>
+
+    <!-- The verdict panel -->
+    <div class="panels">
+      {families.map((f, i) => (
+        <article
+          class:list={["panel", { "is-on": i === 0 }]}
+          data-panel={f.id}
+          aria-hidden={i === 0 ? "false" : "true"}
+        >
+          <p class:list={["badge mono", { "badge-no": !f.solved }]}>{f.verdict}</p>
+          <h4 class="panel-name">{f.name}</h4>
+
+          {f.id === "gbm" && (
+            <Math display label="d X t equals mu X t d t plus sigma X t d W t">
+              d<i>X</i><sub>t</sub> = μ<i>X</i><sub>t</sub> d<i>t</i> + σ<i>X</i><sub>t</sub> d<i>W</i><sub>t</sub>
+            </Math>
+          )}
+          {f.id === "ou" && (
+            <Math display label="d X t equals theta times mu minus X t, d t, plus sigma d W t">
+              d<i>X</i><sub>t</sub> = θ(μ − <i>X</i><sub>t</sub>) d<i>t</i> + σ d<i>W</i><sub>t</sub>
+            </Math>
+          )}
+          {f.id === "logistic" && (
+            <Math display label="d X t equals r X t times one minus X t over K, d t, plus sigma X t d W t">
+              d<i>X</i><sub>t</sub> = <i>rX</i><sub>t</sub>(1 − <i>X</i><sub>t</sub>/<i>K</i>) d<i>t</i> + σ<i>X</i><sub>t</sub> d<i>W</i><sub>t</sub>
+            </Math>
+          )}
+          {f.id === "cir" && (
+            <Math display label="d X t equals theta times mu minus X t, d t, plus sigma root X t d W t">
+              d<i>X</i><sub>t</sub> = θ(μ − <i>X</i><sub>t</sub>) d<i>t</i> + σ√<span class="rad"><i>X</i><sub>t</sub></span> d<i>W</i><sub>t</sub>
+            </Math>
+          )}
+
+          <dl class="verdict">
+            <div>
+              <dt class="mono">{f.solved ? "Method" : "Attempted"}</dt>
+              <dd>{f.method}</dd>
+            </div>
+          </dl>
+
+          <p class="panel-step">{f.step}</p>
+          <p class="panel-note">{f.note}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+
+  <figcaption>
+    Solvable here means a pathwise solution in elementary functions. CIR is
+    excluded by that test but is not intractable: its transition density is known
+    in closed form. The essay is about where each kind of exact answer stops, not
+    about which processes are useful.
+  </figcaption>
+</figure>
+
+<style>
+  .solv {
+    margin: 2.5rem 0;
+    border: 1px solid var(--rule-2);
+    background: var(--paper-2);
+  }
+
+  .solv-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .solv-sub { margin: 0; font-size: 0.84rem; color: var(--ink-3); }
+
+  .solv-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  }
+
+  /* -- map -- */
+  .map-wrap {
+    border-right: 1px solid var(--rule);
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  .map { width: 100%; height: auto; display: block; overflow: visible; }
+
+  .grid line { stroke: var(--rule-2); stroke-width: 1; }
+  .grid .faint { stroke: var(--rule); stroke-dasharray: 3 5; }
+
+  .ax {
+    font-family: var(--mono);
+    font-size: 8.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    fill: var(--ink-3);
+  }
+
+  .ax-end { text-anchor: end; }
+
+  .node { cursor: pointer; }
+
+  /* The halo is the focus indicator. The default ring draws a box around the
+     whole group including the label, which reads as a stray rectangle. */
+  .node:focus,
+  .node:focus-visible { outline: none; }
+
+  .node:focus-visible .halo {
+    opacity: 1;
+    stroke-width: 2;
+    stroke-dasharray: 3 2;
+  }
+
+  .halo {
+    fill: var(--accent-wash);
+    stroke: var(--accent);
+    stroke-width: 1;
+    opacity: 0;
+    transition: opacity 0.18s ease;
+  }
+
+  .node.unsolved .halo { stroke: var(--flag); fill: rgba(180, 83, 9, 0.08); }
+
+  .node:hover .halo,
+  .node.is-on .halo { opacity: 1; }
+
+  .dot {
+    fill: var(--accent);
+    transition: r 0.18s ease;
+  }
+
+  .node.unsolved .dot { fill: var(--paper-2); stroke: var(--flag); stroke-width: 2.5; }
+
+  .node.is-on .dot { r: 9; }
+
+  .node-t {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    text-anchor: middle;
+    fill: var(--ink-2);
+  }
+
+  .node.is-on .node-t { fill: var(--ink); }
+
+  .map-key {
+    margin: 0.6rem 0 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.62rem;
+  }
+
+  .key {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+  }
+
+  .k-ok { background: var(--accent); }
+  .k-no { border: 2px solid var(--flag); margin-left: 0.7rem; }
+
+  /* -- panels -- */
+  .panels { display: grid; padding: 1rem 1.1rem 1.2rem; }
+
+  .panel {
+    grid-area: 1 / 1;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(5px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  }
+
+  .panel.is-on { opacity: 1; visibility: visible; transform: none; }
+
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--on-accent);
+    padding: 0.15rem 0.5rem;
+    font-size: 0.6rem;
+    border-radius: 2px;
+  }
+
+  .badge-no { background: var(--flag); }
+
+  .panel-name {
+    font-size: 1.1rem;
+    margin: 0.7rem 0 0;
+    letter-spacing: -0.015em;
+  }
+
+  .verdict { margin: 0.4rem 0 0; }
+
+  .verdict dt {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .verdict dd { margin: 0.15rem 0 0; font-size: 0.9rem; color: var(--ink); }
+
+  .panel-step {
+    margin: 0.9rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+
+  .panel-note {
+    margin: 0.8rem 0 0;
+    font-size: 0.84rem;
+    line-height: 1.55;
+    color: var(--ink-3);
+    border-left: 2px solid var(--rule-2);
+    padding-left: 0.7rem;
+  }
+
+  .rad { border-top: 1px solid currentColor; padding-top: 1px; }
+
+  figcaption {
+    padding: 0.8rem 1rem 0.95rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.82rem;
+    color: var(--ink-3);
+    line-height: 1.55;
+  }
+
+  @media (max-width: 760px) {
+    .solv-body { grid-template-columns: 1fr; }
+    .map-wrap { border-right: 0; border-bottom: 1px solid var(--rule); }
+  }
+</style>
+
+<script>
+  const host = document.querySelector<HTMLElement>("[data-solv]");
+
+  if (host) {
+    const nodes = Array.from(host.querySelectorAll<SVGGElement>("[data-node]"));
+    const panels = Array.from(host.querySelectorAll<HTMLElement>("[data-panel]"));
+
+    const select = (id: string) => {
+      nodes.forEach((n) => {
+        const on = n.dataset.node === id;
+        n.classList.toggle("is-on", on);
+        n.setAttribute("aria-pressed", String(on));
+      });
+      panels.forEach((p) => {
+        const on = p.dataset.panel === id;
+        p.classList.toggle("is-on", on);
+        p.setAttribute("aria-hidden", String(!on));
+      });
+    };
+
+    nodes.forEach((n) => {
+      const id = n.dataset.node!;
+      n.addEventListener("click", () => select(id));
+      n.addEventListener("focus", () => select(id));
+      // SVG elements with role=button do not fire click on Enter/Space by
+      // default, so the keys are handled explicitly.
+      n.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          select(id);
+        }
+      });
+    });
+
+    select("gbm");
+  }
+</script>

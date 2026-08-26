@@ -1,6 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import SdeSim from "../components/SdeSim.astro";
+import SolvabilityMap from "../components/SolvabilityMap.astro";
 import QuadraticVariation from "../components/QuadraticVariation.astro";
 import Math from "../components/Math.astro";
 import { competitions } from "../data/experience";
@@ -214,9 +215,20 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
 
       <div class="figure-block">
         <p class="narrow figure-intro">
-          The four processes, simulated. Each is integrated with the same scheme
-          over the same interval, so what you see is the structure of the model
-          rather than an artifact of the method.
+          The claim, laid out. Two things decide whether an exact solution
+          exists: what the drift depends on, and what the diffusion depends on.
+          Nonlinear drift turns out to be survivable. Nonlinear diffusion is
+          where it stops.
+        </p>
+
+        <SolvabilityMap />
+      </div>
+
+      <div class="figure-block">
+        <p class="narrow figure-intro">
+          The same four processes, simulated. Each is integrated with the same
+          scheme over the same interval, so what you see is the structure of the
+          model rather than an artifact of the method.
         </p>
 
         <SdeSim />
