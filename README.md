@@ -13,55 +13,44 @@ npm run preview  # serve the built site
 
 Node 22.12 or newer.
 
-## Where the content lives
+## How the site works
 
-Almost everything you'd want to change is in `src/data/`, not in the pages.
+The whole site is one page: a map of everything on it. Every dot is a project,
+a section of a write-up, a fact, or a day in a season log. Opening a dot shows
+its content in a card attached to it, and links between write-ups jump between
+dots. Old URLs such as `/work/frcmob/` redirect to the matching dot
+(`astro.config.mjs`).
+
+Where the dots sit isn't hand-placed. Each item's text is embedded with a small
+language model, and UMAP, Leiden clustering and nearest-neighbour edges are
+computed from those embeddings. See `scripts/map/README.md`, and the "How this
+map was made" card on the site.
+
+## Where the content lives
 
 | File | What it holds |
 |---|---|
-| `src/data/site.ts` | Name, contact details, nav, résumé paths, meta description |
-| `src/data/projects.ts` | Every project card and case-study header |
-| `src/data/experience.ts` | Roles, competitions, skill groups |
-| `src/data/model.ts` | Detector evaluation numbers used on the FRCMOB page |
+| `src/map/content.json` | All long-form text: every write-up's header and sections, roles, pipelines |
+| `src/map/data.js` | The dots: titles, one-line summaries, dates, hand-drawn links and their reasons |
+| `src/map/ml.json` | Generated layout (positions, clusters, similarity edges). Don't edit by hand |
+| `src/map/app.js` | The map itself: rendering, cards, search, tour, the in-node widgets |
+| `src/pages/index.astro` | Page shell, styles, the no-JavaScript text version |
+| `src/data/site.ts` | Name, contact details, meta |
+| `src/data/model.ts` | Detector evaluation numbers used by the recall grid |
 
-Adding a project means appending one object to `projects` in
-`src/data/projects.ts`. The homepage, the work index, and the filter chips all
-derive from that array. Set `featured: false` to keep something off the
-homepage, and add `href` only once a case-study page exists.
-
-## Pages
-
-```
-/                    home
-/work/               project index with filtering
-/work/frcmob/        case study — scouting and match analysis
-/work/hardening/     case study — Windows hardening framework
-/work/eaglets/       case study — robot kits and camps
-/work/cryptography/  case study — course and capstone
-/work/frc5417/       case study — fabrication, pit crew, FRCMOB deployment
-/work/notetaker/     case study — consent-first meeting capture
-/research/           extended essay and physics investigation
-/experience/         roles, education, competitions, skills
-/about/
-/contact/
-```
+**After changing `content.json` or `data.js`, regenerate the layout** with
+`npm run map:docs` followed by `scripts/map/.venv/bin/python -I
+scripts/map/ml.py`. New dots have no position until you do.
 
 ## Interactive figures
 
-These are custom components, not libraries. Each one computes what it draws.
-
-- `FieldTracker.astro` — camera-space to field-space transform, with detection
-  boxes, track IDs, and an accumulating dwell heat map
-- `QuadraticVariation.astro` — refines a seeded Brownian path and shows
-  Σ(ΔW)² converging to the elapsed time
-- `SdeSim.astro` — Euler–Maruyama sample paths for the four models in the
-  extended essay
-- `ModelMetrics.astro` — detector evaluation, validation split vs held-out event
-- `Pipeline.astro` — click-through stage diagrams
-- `CtfBreakdown.astro` — picoCTF category breakdown
-- `Math.astro` — equation typesetting; ships no JS math library
-
-All of them respect `prefers-reduced-motion` and pause when off screen.
+Spot the robots, the quadratic-variation demo, the season log, the detector
+metrics and the picoCTF bars are written into `src/map/app.js`. The older
+figures are still Astro components in `src/components/` (`FieldTracker`,
+`RecallGrid`, `HardeningLab`, `RobotLogicLab`, `MeetingFlow`, `RouteBands`,
+`SolvabilityMap`, `SdeSim`). They render once into an off-screen store on the
+page and move into a card when its dot opens. Inside a card they always use
+their own small-screen layout.
 
 ## Résumé
 
@@ -73,7 +62,7 @@ soffice --headless --convert-to pdf public/Jamal_Mammadzada_Resume.docx \
   --outdir public/
 ```
 
-Keep the résumé and `src/data/` in agreement. They currently match.
+Keep the résumé and `src/map/content.json` in agreement.
 
 ## Things to keep true
 
@@ -90,6 +79,6 @@ Keep the résumé and `src/data/` in agreement. They currently match.
 
 ## Theme
 
-Light by default, following the system preference, with an explicit toggle in
-the header. Colours are tokens on `:root` in `src/styles/global.css`; the dark
-palette only redefines those tokens.
+One deliberate dark theme. Colours are tokens on `:root` in
+`src/pages/index.astro`. The older figures get the same palette through the
+`.legacy` wrapper, with the open dot's colour as their accent.

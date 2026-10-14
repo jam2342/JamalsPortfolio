@@ -1,43 +1,31 @@
 ---
-import Base from "../layouts/Base.astro";
-import { nav } from "../data/site";
+/** Anything that isn't the map. Old page URLs redirect (astro.config.mjs); this is for the rest. */
+const home = import.meta.env.BASE_URL;
 ---
 
-<Base title="Page not found, Jamal Mammadzada">
-  <section class="wrap notfound">
-    <p class="mono">Error 404</p>
-    <h1 class="h-lg">That page doesn't exist.</h1>
-    <p class="lede narrow">
-      The link may be out of date, or the page may have moved. Here's everything
-      that does exist:
-    </p>
-
-    <ul class="nf-list" role="list">
-      <li><a href="/" class="arrow">Home</a></li>
-      {nav.map((item) => <li><a href={item.href} class="arrow">{item.label}</a></li>)}
-    </ul>
-  </section>
-</Base>
-
-<style>
-  .notfound {
-    padding-block: clamp(4rem, 12vw, 8rem);
-  }
-
-  .notfound .mono {
-    margin-bottom: 1.1rem;
-    color: var(--flag);
-  }
-
-  .notfound h1 {
-    margin-bottom: 1.25rem;
-  }
-
-  .nf-list {
-    list-style: none;
-    margin: 2.25rem 0 0;
-    padding: 0;
-    display: grid;
-    gap: 0.6rem;
-  }
-</style>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page not found · Jamal Mammadzada</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;700&display=swap" />
+    <style>
+      :root { color-scheme: dark; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #06070a; color: #e9edf3; font-family: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif; padding-inline: 16px; }
+      main { max-width: 30rem; display: grid; gap: 12px; }
+      h1 { margin: 0; font-size: 1.6rem; }
+      p { margin: 0; color: #aab3c2; line-height: 1.55; }
+      a { color: #e9edf3; text-decoration-color: #2a62e8; text-underline-offset: 3px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>That page doesn't exist.</h1>
+      <p>This whole site is one map now, so every project, write-up and fact lives on a single page.</p>
+      <p><a href={home}>Open the map</a></p>
+    </main>
+  </body>
+</html>

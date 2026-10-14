@@ -1,0 +1,282 @@
+---
+/**
+ * The Route Atlas colour rules, drawn.
+ *
+ * Where the interface is icons rather than text, OCR finds nothing, so nodes
+ * are classified by hue and saturation instead. Every number here is copied
+ * from `avmac/route.py` — the bands were measured off a real capture, not
+ * guessed, and the diagram exists to make the two non-obvious facts visible:
+ * red wraps around zero in OpenCV's 0–180 hue space, and white is separated
+ * from red by saturation rather than by hue.
+ */
+
+type Band = {
+  id: string;
+  label: string;
+  from: number;
+  to: number;
+  sat: string;
+  note: string;
+  /** Which of the two label rows this band's caption sits on. */
+  row: 0 | 1;
+};
+
+const bands: Band[] = [
+  { id: "elite", label: "Elite", from: 0, to: 8, sat: "≥ 110", note: "Red: the floors worth seeking in infinite mode", row: 0 },
+  { id: "challenge", label: "Challenge", from: 9, to: 18, sat: "≥ 110", note: "Orange", row: 1 },
+  { id: "shop", label: "Shop", from: 19, to: 33, sat: "≥ 110", note: "Yellow", row: 0 },
+  { id: "treasure", label: "Treasure", from: 80, to: 102, sat: "≥ 80", note: "Cyan: skipped outright, since there is no handler for a chest room", row: 1 },
+  { id: "boss", label: "Boss", from: 120, to: 165, sat: "≥ 80", note: "Purple", row: 0 },
+  { id: "elite-wrap", label: "Elite (wrap)", from: 170, to: 180, sat: "≥ 110", note: "The same red, on the far side of zero", row: 1 },
+];
+
+const W = 760;
+const X0 = 40;
+const X1 = 720;
+const x = (h: number) => X0 + (h / 180) * (X1 - X0);
+
+// The strip is the actual hue ramp, so a band sits over the colour it matches.
+const stops = Array.from({ length: 19 }, (_, i) => {
+  const h = i * 10;
+  return { offset: `${(h / 180) * 100}%`, color: `hsl(${h * 2} 72% 56%)` };
+});
+
+const ticks = [0, 45, 90, 135, 180];
+const rowY = [62, 82];
+---
+
+<figure class="bands" data-bands>
+  <p class="mono bands-label">Route Atlas · measured colour rules</p>
+
+  <div class="bands-frame">
+    <svg viewBox={`0 0 ${W} 104`} role="img" aria-labelledby="bands-desc">
+      <title id="bands-desc">
+        OpenCV hue from 0 to 180, with six measured colour bands marked: Elite
+        red at 0 to 8 and again at 170 to 180, Challenge orange at 9 to 18,
+        Shop yellow at 19 to 33, Treasure cyan at 80 to 102, and Boss purple at
+        120 to 165. White Battle nodes have no hue band and are identified by
+        saturation below 45 instead.
+      </title>
+
+      <defs>
+        <linearGradient id="hue-ramp" x1="0" y1="0" x2="1" y2="0">
+          {stops.map((s) => <stop offset={s.offset} stop-color={s.color} />)}
+        </linearGradient>
+      </defs>
+
+      <rect
+        x={X0}
+        y="14"
+        width={X1 - X0}
+        height="26"
+        fill="url(#hue-ramp)"
+        rx="1"
+      />
+
+      {
+        ticks.map((t) => (
+          <g class="tick">
+            <line x1={x(t)} y1="40" x2={x(t)} y2="46" />
+            <text x={x(t)} y="10" text-anchor="middle">{t}</text>
+          </g>
+        ))
+      }
+
+      {
+        bands.map((b) => {
+          const cx = (x(b.from) + x(b.to)) / 2;
+          const y = rowY[b.row];
+          return (
+            <g class="band" data-band={b.id}>
+              <rect
+                class="band-box"
+                x={x(b.from)}
+                y="14"
+                width={Math.max(x(b.to) - x(b.from), 3)}
+                height="26"
+              />
+              <line class="band-lead" x1={cx} y1="42" x2={cx} y2={y - 9} />
+              <text class="band-text" x={cx} y={y} text-anchor="middle">
+                {b.label}
+              </text>
+            </g>
+          );
+        })
+      }
+    </svg>
+  </div>
+
+  <ul class="key" role="list">
+    {
+      bands.map((b) => (
+        <li>
+          <button type="button" data-key={b.id} class="key-row">
+            <span class="key-name">{b.label}</span>
+            <span class="mono key-num">H {b.from}–{b.to}</span>
+            <span class="mono key-num">S {b.sat}</span>
+            <span class="key-note">{b.note}</span>
+          </button>
+        </li>
+      ))
+    }
+    <li>
+      <div class="key-row is-static">
+        <span class="key-name">Battle</span>
+        <span class="mono key-num">H any</span>
+        <span class="mono key-num">S &lt; 45</span>
+        <span class="key-note">
+          White has no hue to match on. It sits at the same hue as red and is
+          told apart by saturation (0 against 167), so it is tested last, as
+          the catch-all.
+        </span>
+      </div>
+    </li>
+  </ul>
+
+  <figcaption>
+    Order matters: the saturated colours are tested before white's catch-all
+    rule, and only nodes at value ≥ 150 are considered at all. Reachable nodes
+    are drawn at V ≈ 205–246 and already-visited ones at V ≈ 103, which is the
+    threshold that keeps the macro from routing backwards into floors it has
+    already played.
+  </figcaption>
+</figure>
+
+<style>
+  .bands {
+    margin: 2.25rem 0;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper-2);
+    padding: 1.1rem;
+  }
+
+  .bands-label { margin: 0 0 0.9rem; }
+
+  .bands-frame { overflow-x: auto; }
+
+  svg {
+    display: block;
+    width: 100%;
+    min-width: 480px;
+    height: auto;
+  }
+
+  .tick line { stroke: var(--rule-2); stroke-width: 1; }
+
+  .tick text {
+    font-family: var(--mono);
+    font-size: 9px;
+    fill: var(--ink-3);
+  }
+
+  .band-box {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1.5;
+    /* The ramp underneath is the colour; the box is only the bracket. */
+    paint-order: stroke;
+  }
+
+  .band-lead { stroke: var(--rule-2); stroke-width: 1; }
+
+  .band-text {
+    font-family: var(--mono);
+    font-size: 10px;
+    fill: var(--ink-2);
+    letter-spacing: 0.03em;
+  }
+
+  /* One band selected: everything else recedes rather than disappearing. */
+  .bands[data-on] .band { opacity: 0.28; }
+  .bands[data-on] .band.is-on { opacity: 1; }
+  .bands[data-on] .band.is-on .band-box { stroke: var(--accent); stroke-width: 2.5; }
+  .bands[data-on] .band.is-on .band-text { fill: var(--accent); }
+
+  .band { transition: opacity 0.16s ease; }
+
+  .key {
+    list-style: none;
+    margin: 1.1rem 0 0;
+    padding: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .key-row {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 7rem 5.5rem 5rem 1fr;
+    gap: 0.9rem;
+    align-items: baseline;
+    text-align: left;
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--rule);
+    padding: 0.5rem 0.4rem 0.55rem 0;
+    color: inherit;
+    font: inherit;
+    font-size: var(--fs-sm);
+    cursor: pointer;
+    transition: background 0.16s ease, padding 0.16s ease;
+  }
+
+  .key-row.is-static { cursor: default; }
+
+  button.key-row:hover,
+  button.key-row.is-on {
+    background: var(--accent-wash);
+    padding-left: 0.4rem;
+  }
+
+  .key-name { font-weight: 500; }
+  .key-num { font-size: var(--fs-label); color: var(--ink-3); }
+  .key-note { color: var(--ink-2); font-size: var(--fs-sm); line-height: 1.5; }
+
+  button.key-row.is-on .key-name { color: var(--accent); }
+
+  figcaption {
+    margin-top: 0.9rem;
+    font-size: var(--fs-sm);
+    color: var(--ink-3);
+    line-height: 1.55;
+    max-width: 66ch;
+  }
+
+  @media (max-width: 640px) {
+    .key-row {
+      grid-template-columns: 1fr auto auto;
+      gap: 0.5rem 0.7rem;
+    }
+
+    .key-note { grid-column: 1 / -1; }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>("[data-bands]");
+
+  if (root) {
+    const keys = Array.from(root.querySelectorAll<HTMLButtonElement>("[data-key]"));
+    const groups = Array.from(root.querySelectorAll<SVGGElement>("[data-band]"));
+
+    const show = (id: string | null) => {
+      if (id) root.dataset.on = id;
+      else delete root.dataset.on;
+
+      groups.forEach((g) => g.classList.toggle("is-on", g.dataset.band === id));
+      keys.forEach((k) => k.classList.toggle("is-on", k.dataset.key === id));
+    };
+
+    keys.forEach((k) => {
+      const id = k.dataset.key!;
+      k.addEventListener("mouseenter", () => show(id));
+      k.addEventListener("focus", () => show(id));
+      k.addEventListener("click", () => show(root.dataset.on === id ? null : id));
+    });
+
+    root.addEventListener("mouseleave", () => show(null));
+    root.addEventListener("focusout", (e) => {
+      if (!root.contains(e.relatedTarget as Node)) show(null);
+    });
+  }
+</script>

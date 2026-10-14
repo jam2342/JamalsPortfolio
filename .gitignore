@@ -19,3 +19,7 @@ output/
 
 # os
 .DS_Store
+
+# map pipeline working files
+scripts/map/.venv/
+scripts/map/docs.json
