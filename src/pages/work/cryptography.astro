@@ -28,7 +28,7 @@ const sections = [
 
 <Base
   title="Practical Cryptography, Jamal Mammadzada"
-  description="A case study on a 43-lecture cryptography course built around a deliberately broken application students must audit and make a release decision about."
+  description="A case study on a 43-lecture cryptography course that ends with a broken application students have to audit and decide whether to ship."
   progress={true}
 >
   <article>
@@ -40,7 +40,7 @@ const sections = [
       <p class="lede narrow case-lede">
         A course for developers and QA engineers, built around a problem most
         cryptography teaching avoids: deciding whether software that uses
-        cryptography is actually safe to ship.
+        cryptography is safe to ship.
       </p>
 
       <dl class="meta-grid case-meta">
@@ -99,8 +99,8 @@ const sections = [
       </p>
 
       <p>
-        So the course is built backwards from the thing a working engineer
-        actually has to do: look at a system, work out where cryptography appears
+        So the course is built backwards from what a working engineer has to
+        do: look at a system, work out where cryptography appears
         in it, test whether it holds, and say whether it ships.
       </p>
     </section>
@@ -126,8 +126,7 @@ const sections = [
       </ol>
 
       <p class="narrow sections-after">
-        The failure sections aren't a postscript. Heartbleed, DigiNotar, and the
-        rest are there because a student who has seen how a real system failed
+        Heartbleed, DigiNotar, and the rest get whole sections because a student who has seen how a real system failed
         reads unfamiliar code differently than one who has only seen it work.
       </p>
     </section>
@@ -205,18 +204,17 @@ const sections = [
       </ul>
 
       <details class="tech capstone-note">
-        <summary>Why the defects are planted rather than accidental</summary>
+        <summary>Why the defects are planted on purpose</summary>
         <p>
-          The application has known defects deliberately built into it. That
-          makes assessment tractable. There's a ground truth for what a thorough
-          audit should surface, so a student's work can be measured against
-          what's actually there rather than against how confident their report
+          Because I know every defect in the application, there's a ground
+          truth for what a thorough audit should surface. A student's work gets
+          measured against what's there, not against how confident their report
           sounds.
         </p>
         <p>
-          It also means the failure modes can be chosen. The defects reflect the
-          categories that cause real incidents rather than the ones that are
-          convenient to hide.
+          It also means I got to pick the failure modes. They come from the
+          categories that cause real incidents, not the ones that are convenient
+          to hide.
         </p>
       </details>
 
@@ -225,8 +223,8 @@ const sections = [
         <p>
           Assessment runs against hidden tests rather than a rubric a student
           can pattern-match. Alongside that, mutation-based evaluation checks
-          something a checklist can't: whether a student's test suite actually
-          detects the problems it claims to cover.
+          something a checklist can't: whether a student's test suite detects
+          the problems it claims to cover.
         </p>
         <p>
           A test that passes on broken code is worse than no test, because it
@@ -243,7 +241,7 @@ const sections = [
         Lectures alone don't teach you to spot a broken implementation, so the
         course ships a local range: {kit.activities} graded exercises plus an
         orientation, roughly {Math.round(kit.minutes / 60)} hours of work, placed
-        at the points in the course where a new skill actually becomes testable.
+        at the points in the course where a new skill becomes testable.
       </p>
 
       <p class="narrow">
@@ -271,14 +269,13 @@ const sections = [
 
       <div class="narrow">
         <p class="kit-note">
-          Sixteen exercises, sixteen different formats. That's deliberate: a
-          key-ceremony tabletop and a mutation-test design exercise assess
-          different things, and running everything as the same kind of quiz
-          would flatten the distinction.
+          Sixteen exercises, sixteen different formats. A key-ceremony tabletop
+          and a mutation-test design exercise assess different things, and
+          running everything as the same kind of quiz would flatten that.
         </p>
 
         <details class="tech">
-          <summary>Why the range is local and deliberately unglamorous</summary>
+          <summary>Why the range runs on your own machine</summary>
           <p>
             Every exercise runs from an extracted folder with a private Python
             environment, on Python {kit.python}. Setup is one script, and it
@@ -298,17 +295,16 @@ const sections = [
       <h2 class="h-lg sec-title" id="decision">The release decision</h2>
 
       <p>
-        The last deliverable isn't a list of findings. It's a judgment: does this
-        ship, and why.
+        The last deliverable is a judgment: does this ship, and why?
       </p>
 
       <p>
         That's the part I most wanted in the course, because it's the part
         engineers get wrong and no exam tests. Not every defect blocks a release,
-        and "I found something" is not a decision. Working out which findings are
-        blocking, which are acceptable with a known risk, and how to say so to
-        someone who wants to ship on Friday. That's the skill separating someone who
-        can run a scanner from someone you'd trust to sign off.
+        and "I found something" is not a decision. The skill is working out
+        which findings block, which are acceptable with a known risk, and how to
+        say so to someone who wants to ship on Friday. That's what separates
+        someone who can run a scanner from someone you'd trust to sign off.
       </p>
 
       <p>
@@ -395,12 +391,12 @@ const sections = [
     align-items: baseline;
     padding: 0.62rem 1rem 0.62rem 0;
     border-bottom: 1px solid var(--rule);
-    font-size: 0.93rem;
+    font-size: var(--fs-ui);
     color: var(--ink-2);
   }
 
   .sec-n {
-    font-size: 0.64rem;
+    font-size: var(--fs-label);
     color: var(--accent);
   }
 
@@ -422,14 +418,14 @@ const sections = [
     grid-template-columns: 1.6rem 1fr;
     gap: 0.5rem;
     color: var(--ink-2);
-    font-size: 0.96rem;
+    font-size: var(--fs-ui);
     counter-increment: task;
   }
 
   .task-list li::before {
     content: counter(task, decimal-leading-zero);
     font-family: var(--mono);
-    font-size: 0.64rem;
+    font-size: var(--fs-label);
     color: var(--accent);
     padding-top: 0.35em;
   }
@@ -473,7 +469,7 @@ const sections = [
   .lesson-frames img {
     width: 100%;
     border: 1px solid var(--rule);
-    border-radius: 2px;
+    border-radius: var(--radius);
     background: #0b2230;
   }
 
@@ -482,13 +478,13 @@ const sections = [
     gap: 0.45rem;
     margin-top: 0.7rem;
     color: var(--ink-2);
-    font-size: 0.86rem;
+    font-size: var(--fs-sm);
     line-height: 1.5;
   }
 
   .lesson-frames figcaption .mono {
     color: var(--accent);
-    font-size: 0.6rem;
+    font-size: var(--fs-label);
   }
 
   @media (max-width: 900px) {
@@ -523,23 +519,23 @@ const sections = [
 
   .kit-n {
     color: var(--accent);
-    font-size: 0.64rem;
+    font-size: var(--fs-label);
   }
 
   .kit-min {
-    font-size: 0.6rem;
+    font-size: var(--fs-label);
   }
 
   .kit-title {
     margin: 0 0 0.3rem;
-    font-size: 0.94rem;
-    font-weight: 540;
+    font-size: var(--fs-ui);
+    font-weight: 500;
     letter-spacing: -0.012em;
   }
 
   .kit-format {
     margin: 0;
-    font-size: 0.8rem;
+    font-size: var(--fs-sm);
     color: var(--ink-3);
     line-height: 1.4;
   }
@@ -572,7 +568,7 @@ const sections = [
 
   .course-sub {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: var(--fs-ui);
     color: var(--ink-3);
   }
 

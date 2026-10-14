@@ -23,7 +23,7 @@ const panels = [
   },
   {
     head: `v2 · held-out event · ${detector.holdoutEvent}`,
-    sub: "An event the model never saw. The honest number, and the old bar.",
+    sub: "An event the model never saw. The number that counts, and the old bar.",
     data: detector.v2,
     holdout: true,
   },
@@ -80,7 +80,7 @@ const panels = [
 
   .panel-sub {
     margin: 0 0 1.1rem;
-    font-size: 0.84rem;
+    font-size: var(--fs-sm);
     color: var(--ink-3);
     line-height: 1.45;
     min-height: 2.4em;
@@ -95,7 +95,7 @@ const panels = [
   }
 
   .bar-label {
-    font-size: 0.63rem;
+    font-size: var(--fs-label);
   }
 
   .bar-track {
@@ -123,7 +123,7 @@ const panels = [
   }
 
   .bar-val {
-    font-size: 0.68rem;
+    font-size: var(--fs-label);
     text-align: right;
     color: var(--ink-2);
     font-variant-numeric: tabular-nums;

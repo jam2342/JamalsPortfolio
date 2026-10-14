@@ -26,7 +26,7 @@ const kits = [
     image: "/img/eaglets/evolution/v2.jpg",
     alt: "The second Eaglets robot kit viewed from above, with a Raspberry Pi Pico and motor driver mounted on a wooden chassis.",
     detail:
-      "Rebuilt around where students actually got stuck in early camps, rather than around what was elegant to design.",
+      "Rebuilt around the exact steps where students got stuck in the early camps.",
   },
   {
     v: "V3.2",
@@ -34,7 +34,7 @@ const kits = [
     image: "/img/eaglets/evolution/v3-2.jpg",
     alt: "Eaglets kit version 3.2 with a wooden chassis, sensors, motors, battery, and hand-wired electronics.",
     detail:
-      "An ultrasonic distance sensor and a photoresistor. The robot reacts to the world instead of replaying a script. That's the point where students start writing conditions rather than sequences.",
+      "An ultrasonic distance sensor and a photoresistor. This is where students start writing conditions, like turning when a wall gets close, instead of fixed sequences.",
   },
   {
     v: "V3.6",
@@ -61,7 +61,7 @@ const kits = [
     v: "V6",
     title: "Under active development",
     detail:
-      "The generation currently being prepared for testing and summer 2027 production. It is still under active development, not a finished production kit.",
+      "The generation being prepared for testing and summer 2027 production. It isn't finished yet.",
   },
 ];
 ---
@@ -81,7 +81,7 @@ const kits = [
         A student-run program that teaches free robotics camps for grades 3–8,
         using kits the club has developed over several generations. I run the
         program. I did not design the kits, and this page is mostly about the
-        thing that is actually hard: getting a room full of ten-year-olds to
+        hard part: getting a room full of ten-year-olds to
         finish a working robot and understand what they just did.
       </p>
 
@@ -121,7 +121,7 @@ const kits = [
     </div>
 
     <section class="wrap section narrow" aria-labelledby="problem">
-      <h2 class="h-lg sec-title" id="problem">The actual engineering problem</h2>
+      <h2 class="h-lg sec-title" id="problem">The engineering problem</h2>
 
       <p>
         Off-the-shelf educational robots solve the wrong problem. The good ones
@@ -160,7 +160,7 @@ const kits = [
         src="/img/eaglets/camp-kit-debug.jpg"
         alt="Jamal at a camp table, one hand on a part-built Eaglets robot and the other on a laptop trackpad, while a student leans in to watch."
         label="Plate 02 — camp session"
-        caption="The part of the job that is actually mine: sitting with a build that will not run and working out which of the nine wires is in the wrong header."
+        caption="The part of the job that's mine: sitting with a build that will not run and working out which of the nine wires is in the wrong header."
         width={1004}
         height={710}
       />
@@ -243,10 +243,10 @@ const kits = [
       </p>
 
       <p>
-        The reason this is worth writing down is what it isn't. It's tempting to
-        describe the breadboard switch as a teaching decision. Students see the
-        circuit, wiring becomes part of the lesson. Tidy story. It's also false. The boards broke, and the team improvised under a deadline. Those
-        camps ran.
+        It would be easy to tell the breadboard switch as a teaching decision:
+        students see the circuit, so wiring becomes part of the lesson. That
+        isn't what happened. The boards broke, the team improvised under a
+        deadline, and the camps ran anyway.
       </p>
     </section>
 
@@ -263,7 +263,7 @@ const kits = [
       <Figure
         src="/img/jamal-teaching.jpg"
         alt="Jamal speaking from a podium at an Eaglets camp session, with the program's slide projected behind him."
-        label="Plate 02"
+        label="Plate 03"
         caption="Running a session at an Eaglets camp. Photographs from camps are cropped to exclude students."
         width={940}
         height={608}
@@ -282,13 +282,12 @@ const kits = [
           logic. A student writes the condition that decides what happens when
           the distance sensor reads under some threshold. They don't write the
           ultrasonic timing code, but the decision is theirs, and it's a real
-          one. Sensors are what make that possible. They're the difference between a
-          robot that replays a sequence and a robot that responds, and they're
-          where students stop copying and start debugging.
+          one. Sensors are what make that possible, and they're usually where
+          students stop copying code and start debugging it.
         </p>
 
         <details class="tech">
-          <summary>Debugging is the part that actually teaches</summary>
+          <summary>Debugging teaches the most</summary>
           <p>
             The moment worth engineering for is when a student's robot does
             something they didn't intend. That's when they have to reason about
@@ -499,7 +498,7 @@ const kits = [
   }
 
   .kit-v {
-    font-size: 0.66rem;
+    font-size: var(--fs-label);
     color: inherit;
   }
 
@@ -539,12 +538,12 @@ const kits = [
     aspect-ratio: 4 / 3;
     object-fit: cover;
     border: 1px solid var(--rule);
-    border-radius: 2px;
+    border-radius: var(--radius);
   }
 
   .kit-evidence figcaption {
     margin-top: 0.55rem;
-    font-size: 0.6rem;
+    font-size: var(--fs-label);
   }
 
   .kit-detail h3 {
@@ -553,13 +552,13 @@ const kits = [
 
   .kit-detail p {
     color: var(--ink-2);
-    font-size: 0.95rem;
+    font-size: var(--fs-ui);
     margin: 0;
   }
 
   .kit-detail .kit-no-photo {
     margin-top: 1rem;
-    font-size: 0.62rem;
+    font-size: var(--fs-label);
   }
 
   code {
@@ -567,7 +566,7 @@ const kits = [
     font-size: 0.86em;
     background: var(--accent-wash);
     padding: 0.1em 0.35em;
-    border-radius: 2px;
+    border-radius: var(--radius);
   }
 
   .resp-list {
@@ -582,12 +581,12 @@ const kits = [
     border-left: 2px solid var(--rule);
     padding-left: 1rem;
     color: var(--ink-2);
-    font-size: 0.96rem;
+    font-size: var(--fs-ui);
   }
 
   .resp-list strong {
     color: var(--ink);
-    font-weight: 560;
+    font-weight: 600;
   }
 
   .resp-after {

@@ -59,7 +59,7 @@ const visionStages = [
 
 <Base
   title="FRCMOB, Jamal Mammadzada"
-  description="A case study on FRCMOB: a full-stack FIRST Robotics scouting platform with team workspaces, offline event packs, honestly evaluated match predictions, and a computer-vision match breakdown that runs on the scout's phone."
+  description="A case study on FRCMOB: a full-stack FIRST Robotics scouting platform with team workspaces, offline event packs, match predictions tested without hindsight, and a computer-vision match breakdown that runs on the scout's phone."
   progress={true}
 >
   <article>
@@ -71,7 +71,7 @@ const visionStages = [
       <p class="lede narrow case-lede">
         Built and deployed for FRC Team 5417, FRCMOB is a full scouting platform:
         team workspaces and live multi-scout rooms, offline event packs, match
-        predictions that were tested honestly, and a computer-vision breakdown
+        predictions tested without hindsight, and a computer-vision breakdown
         that runs on the scout's own phone.
       </p>
 
@@ -171,8 +171,8 @@ const visionStages = [
         so that nothing produced by a model becomes accepted data on its own.
         Every automatic result carries a confidence value, and a human either
         approves it, corrects specific fields, or throws it out. The same rule
-        ended up applying to my own numbers: if I can't measure it honestly, it
-        doesn't ship.
+        ended up applying to my own numbers: if I can't measure it on data it
+        hasn't seen, it doesn't ship.
       </p>
     </section>
 
@@ -182,7 +182,7 @@ const visionStages = [
       <p class="narrow">
         Eight months, from a first commit to a platform. The spring was built
         around competitions, with fixes landing during events. The fall was
-        about making it honest and keeping it up.
+        about measuring it properly and keeping it running.
       </p>
 
       <SeasonLog />
@@ -414,7 +414,7 @@ const visionStages = [
             see. A false detection is a phantom robot with a path, a zone
             history, and a heat map attributed to a real team. That noise
             propagates and looks exactly like real data. Recall went up because
-            the labels got honest, not because precision was traded away for it.
+            the labels got fixed, not because precision was traded away for it.
           </p>
         </details>
       </div>
@@ -477,7 +477,7 @@ const visionStages = [
 
         <p>
           Detection says where robots are. The scout says who they are, and the
-          goal is to ask as little as possible. To score that honestly I labelled
+          goal is to ask as little as possible. To measure that, I labelled
           one match by hand from its 1080p upload: bumper numbers, each robot's
           look, and elimination within a frame.
         </p>
@@ -510,7 +510,7 @@ const visionStages = [
     </section>
 
     <section class="wrap section narrow" aria-labelledby="predictions">
-      <h2 class="h-lg sec-title" id="predictions">Predicting matches honestly</h2>
+      <h2 class="h-lg sec-title" id="predictions">Predicting matches without hindsight</h2>
 
       <p>
         FRCMOB predicts who wins each match, and every page that shows a win
@@ -529,8 +529,8 @@ const visionStages = [
       <p>
         The fix was an as-of replay. For each match, the database is rewound
         to what was known before it, and only that is used to predict it. Run
-        over the 56 newest events of the 2026 season, it gave every candidate
-        the same honest test.
+        over the 56 newest events of the 2026 season, it scored every candidate
+        on exactly the same replay.
       </p>
 
       <div class="ledger-wrap">
@@ -541,7 +541,7 @@ const visionStages = [
           </thead>
           <tbody>
             <tr class="is-shipped"><th scope="row">Fuel rate, shrunk toward last event (shipped)</th><td>74.9%</td><td>0.173</td></tr>
-            <tr><th scope="row">Rating formula, honest inputs</th><td>69.2%</td><td>0.195</td></tr>
+            <tr><th scope="row">Rating formula, as-of inputs</th><td>69.2%</td><td>0.195</td></tr>
             <tr class="is-leaky"><th scope="row">Rating formula, end-of-event inputs (leaky)</th><td>81.5%</td><td>0.141</td></tr>
           </tbody>
         </table>
@@ -562,7 +562,7 @@ const visionStages = [
         round of each event, before any result existed, it scored 82%. With
         those inputs removed, that same round fell to a coin flip. Every
         evaluation now cuts post-match data off first, and the ML stays switched
-        off in production until it beats the formula on the same honest test.
+        off in production until it beats the formula on the same replay.
       </p>
     </section>
 
@@ -698,7 +698,7 @@ const visionStages = [
         </p>
 
         <details class="tech">
-          <summary>Keeping the on-device path honest</summary>
+          <summary>Keeping the phone and the server in agreement</summary>
           <p>
             The phone's breakdown has to agree with what the server does with
             it afterwards, which is a real risk when similar logic exists in two
@@ -853,9 +853,9 @@ const visionStages = [
           </p>
           <p>
             That process did its job. The match-outcome model is switched off
-            in production because it lost an honest test to a simpler formula,
+            in production because it lost a fair test to a simpler formula,
             as described in{" "}
-            <a href="#predictions">predicting matches honestly</a>. Without a
+            <a href="#predictions">predicting matches without hindsight</a>. Without a
             benchmark fixed in advance, "the new model seems better" is an easy
             thing to believe and hard to check.
           </p>
@@ -893,7 +893,7 @@ const visionStages = [
         <p>
           The backend has been live since September. Recall is up, and the
           on-device breakdown is now the main path, not a fallback. The parts
-          I'd call solid are the honest evaluation setup for both the detector
+          I'd call solid are the as-of evaluation setup for both the detector
           and the predictor, team rooms and offline sync, and the production
           deployment.
         </p>
@@ -923,7 +923,7 @@ const visionStages = [
             <strong>ML that earns its place.</strong> A model using only
             pre-match features reached 72.6% in testing, but it isn't switched
             on. It goes live when it beats the shipped formula on the same
-            honest replay, not before.
+            as-of replay, not before.
           </li>
         </ul>
       </div>
@@ -1013,7 +1013,7 @@ const visionStages = [
   .detection-plates figcaption {
     padding: 1rem;
     color: var(--ink-2);
-    font-size: 0.88rem;
+    font-size: var(--fs-ui);
     line-height: 1.55;
   }
 
@@ -1021,7 +1021,7 @@ const visionStages = [
     display: block;
     margin-bottom: 0.45rem;
     color: var(--accent);
-    font-size: 0.58rem;
+    font-size: var(--fs-label);
   }
 
   .product-plates {
@@ -1048,7 +1048,7 @@ const visionStages = [
   .product-plates figcaption {
     padding: 1rem;
     color: var(--ink-2);
-    font-size: 0.88rem;
+    font-size: var(--fs-ui);
     line-height: 1.55;
   }
 
@@ -1056,7 +1056,7 @@ const visionStages = [
     display: block;
     margin-bottom: 0.45rem;
     color: var(--accent);
-    font-size: 0.58rem;
+    font-size: var(--fs-label);
   }
 
   .arch-grid {
@@ -1089,7 +1089,7 @@ const visionStages = [
     padding: 0;
     display: grid;
     gap: 0.3rem;
-    font-size: 0.9rem;
+    font-size: var(--fs-ui);
     color: var(--ink-2);
   }
 
@@ -1105,7 +1105,7 @@ const visionStages = [
     border-left: 2px solid var(--rule);
     padding-left: 1rem;
     color: var(--ink-2);
-    font-size: 0.96rem;
+    font-size: var(--fs-ui);
   }
 
   .next-list + p {
@@ -1114,7 +1114,7 @@ const visionStages = [
 
   .next-list strong {
     color: var(--ink);
-    font-weight: 560;
+    font-weight: 600;
   }
 
   .case-next {
@@ -1151,7 +1151,7 @@ const visionStages = [
   .ledger {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.92rem;
+    font-size: var(--fs-ui);
   }
 
   .ledger caption {
@@ -1171,7 +1171,7 @@ const visionStages = [
 
   .ledger thead th {
     font-family: var(--mono);
-    font-size: 0.62rem;
+    font-size: var(--fs-label);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -1191,7 +1191,7 @@ const visionStages = [
   .ledger .is-shipped th,
   .ledger .is-shipped td {
     color: var(--ink);
-    font-weight: 560;
+    font-weight: 600;
   }
 
   .ledger .is-shipped td:nth-child(2) {

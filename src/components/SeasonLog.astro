@@ -217,7 +217,7 @@ const first = placed[0];
     position: absolute;
     transform: translateX(-2px);
     font-family: var(--mono);
-    font-size: 0.6rem;
+    font-size: var(--fs-label);
     letter-spacing: 0.06em;
     color: var(--ink-3);
   }
@@ -245,7 +245,7 @@ const first = placed[0];
   .card-body {
     margin: 0.35rem 0 0;
     color: var(--ink-2);
-    font-size: 0.94rem;
+    font-size: var(--fs-ui);
     line-height: 1.55;
     max-width: 62ch;
   }
@@ -268,18 +268,18 @@ const first = placed[0];
     margin-top: 1rem;
   }
 
-  .step-n { font-size: 0.64rem; color: var(--ink-3); }
+  .step-n { font-size: var(--fs-label); color: var(--ink-3); }
 
   .chip {
     font-family: var(--mono);
-    font-size: 0.66rem;
+    font-size: var(--fs-label);
     letter-spacing: 0.06em;
     padding: 0.3rem 0.6rem;
     border: 1px solid var(--rule-2);
     background: transparent;
     color: var(--ink-2);
     cursor: pointer;
-    border-radius: 2px;
+    border-radius: var(--radius);
   }
 
   .chip:hover:not(:disabled) { color: var(--ink); }
@@ -312,15 +312,15 @@ const first = placed[0];
   }
 
   .list p { margin: 0; }
-  .li-when { color: var(--accent); font-size: 0.64rem; }
+  .li-when { color: var(--accent); font-size: var(--fs-label); }
   .li-title { margin-top: 0.2rem !important; font-weight: 600; }
-  .li-body { margin-top: 0.2rem !important; font-size: 0.9rem; color: var(--ink-2); line-height: 1.5; }
+  .li-body { margin-top: 0.2rem !important; font-size: var(--fs-ui); color: var(--ink-2); line-height: 1.5; }
   .li-stat { margin-top: 0.3rem !important; font-weight: 600; font-variant-numeric: tabular-nums; }
 
   figcaption {
     padding: 0.8rem 1rem 0.95rem;
     border-top: 1px solid var(--rule);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     color: var(--ink-3);
     line-height: 1.55;
   }

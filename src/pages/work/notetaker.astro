@@ -58,7 +58,7 @@ const project = projects.find((p) => p.id === "notetaker")!;
         In the code there is exactly one path that begins capture, and it is
         reachable from two places: the menu bar item you click, and the button
         in a dialog you answered. Detection can raise that dialog. It cannot
-        answer it. The asymmetry is deliberate, because a recorder that starts
+        answer it. That asymmetry is on purpose: a recorder that starts
         itself in a 1:1 or an interview is not a bug you get to apologize for
         afterward.
       </p>
@@ -129,7 +129,7 @@ const project = projects.find((p) => p.id === "notetaker")!;
         RIFF header is well formed, the duration is right, and the waveform looks
         normal because your microphone is still feeding it. What you have lost is
         every other participant. With headphones on, the failure is total and
-        completely invisible: you record yourself saying "mm-hm" for forty
+        invisible: you record yourself saying "mm-hm" for forty
         minutes and nothing else.
       </p>
 
@@ -137,8 +137,8 @@ const project = projects.find((p) => p.id === "notetaker")!;
         That is the reason the WAV harness drives the writer with two synthetic
         tones instead of asserting that a file was produced. It starts a 440 Hz
         tone at zero seconds and an 880 Hz tone one second later, then measures
-        RMS in three windows. The first source alone, the overlap, and the second
-        source alone. The overlap has to be meaningfully louder than either tone
+        RMS in three windows: the first source alone, the overlap, and the
+        second source alone. The overlap has to be meaningfully louder than either tone
         by itself, which is only true if mixing actually happened. It also checks
         that summed peaks clamp instead of wrapping around, because a sign
         inversion at the top of the range is the kind of thing you hear as a
@@ -152,11 +152,11 @@ const project = projects.find((p) => p.id === "notetaker")!;
       </div>
 
       <details class="tech">
-        <summary>What the app deliberately does not guess</summary>
+        <summary>What the app won't guess</summary>
         <p>
           whisper.cpp does not provide reliable speaker diarization here, so the
           note prompt only attributes a statement when context makes the speaker
-          clear. A missing label is more honest than a polished wrong one.
+          clear. A missing label beats a confident wrong one.
         </p>
       </details>
     </section>
@@ -181,7 +181,7 @@ const project = projects.find((p) => p.id === "notetaker")!;
         <p>
           On macOS 26 it reports false while an application is actively
           recording. I checked it against ffmpeg holding the microphone open, so
-          this is a measurement rather than an inference. Any detector built on
+          this is measured, not inferred. Any detector built on
           it would have failed closed and never prompted at all.
         </p>
       </details>
@@ -248,12 +248,12 @@ const project = projects.find((p) => p.id === "notetaker")!;
   .arch-card { background: var(--paper-2); padding: clamp(1.1rem, 2.5vw, 1.6rem); }
   .arch-card .mono { color: var(--accent); margin-bottom: 1rem; }
   .arch-card h3 { margin-bottom: 0.8rem; }
-  .arch-card p:last-child { color: var(--ink-2); font-size: 0.9rem; }
+  .arch-card p:last-child { color: var(--ink-2); font-size: var(--fs-ui); }
 
   .checks { display: grid; gap: 0.7rem; margin: 1.7rem 0; }
   .checks > div { display: grid; grid-template-columns: 8rem 1fr; gap: 1rem; border-top: 1px solid var(--rule); padding-top: 0.8rem; }
-  .checks .mono { color: var(--accent); font-size: 0.62rem; }
-  .checks p { margin: 0; color: var(--ink-2); font-size: 0.9rem; }
+  .checks .mono { color: var(--accent); font-size: var(--fs-label); }
+  .checks p { margin: 0; color: var(--ink-2); font-size: var(--fs-ui); }
 
   code {
     font-family: var(--mono);
@@ -261,7 +261,7 @@ const project = projects.find((p) => p.id === "notetaker")!;
     background: var(--accent-wash);
     color: var(--accent-ink);
     padding: 0.12em 0.36em;
-    border-radius: 2px;
+    border-radius: var(--radius);
     /* Long API identifiers must not push the column wider on small screens. */
     overflow-wrap: anywhere;
   }

@@ -172,9 +172,9 @@
   }
 
   .flow span, .flow strong, .flow small { display: block; }
-  .flow span { margin-bottom: 0.65rem; font-size: 0.6rem; }
-  .flow strong { font-size: 0.9rem; font-weight: 580; }
-  .flow small { margin-top: 0.4rem; font-size: 0.72rem; line-height: 1.45; }
+  .flow span { margin-bottom: 0.65rem; font-size: var(--fs-label); }
+  .flow strong { font-size: var(--fs-ui); font-weight: 600; }
+  .flow small { margin-top: 0.4rem; font-size: var(--fs-label); line-height: 1.45; }
 
   .boundary {
     display: grid;
@@ -186,14 +186,14 @@
   }
 
   .boundary > div { display: flex; gap: 0.65rem; align-items: flex-start; }
-  .boundary p { margin: 0; font-size: 0.78rem; line-height: 1.5; color: var(--ink-2); }
+  .boundary p { margin: 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--ink-2); }
   .boundary strong { color: var(--ink); }
   .boundary-dot { width: 9px; height: 9px; margin-top: 0.3rem; border-radius: 50%; flex: none; }
   .boundary-dot.local { background: var(--accent); }
   .boundary-dot.sent { border: 2px solid var(--flag); }
 
   .controls { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
-  .controls .btn { font-size: 0.78rem; padding: 0.58rem 0.8rem; cursor: pointer; }
+  .controls .btn { font-size: var(--fs-sm); padding: 0.58rem 0.8rem; cursor: pointer; }
   .controls button:disabled { opacity: 0.38; cursor: not-allowed; }
   .reset { border: 0; background: transparent; cursor: pointer; padding: 0.5rem; }
 
@@ -207,7 +207,7 @@
   .note-preview > .mono { margin-bottom: 0.5rem; }
   .note-preview h4 { margin-bottom: 0.8rem; }
   .note-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  .note-cols p { margin: 0; font-size: 0.84rem; color: var(--ink-2); }
+  .note-cols p { margin: 0; font-size: var(--fs-sm); color: var(--ink-2); }
 
   @media (max-width: 720px) {
     .lab-head { display: grid; }

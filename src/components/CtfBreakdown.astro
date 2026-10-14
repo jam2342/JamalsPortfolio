@@ -90,14 +90,14 @@ const solved = comp.breakdown!.reduce((n, b) => n + b.solved, 0);
   .rank-val {
     margin: 0;
     font-size: 1.35rem;
-    font-weight: 560;
+    font-weight: 600;
     letter-spacing: -0.02em;
     color: var(--accent);
   }
 
   .rank-score {
     margin: 0.3rem 0 0;
-    font-size: 0.63rem;
+    font-size: var(--fs-label);
     text-transform: none;
     letter-spacing: 0.04em;
     color: var(--flag);
@@ -118,12 +118,12 @@ const solved = comp.breakdown!.reduce((n, b) => n + b.solved, 0);
   }
 
   .cat-name {
-    font-size: 0.87rem;
+    font-size: var(--fs-sm);
     color: var(--ink-2);
   }
 
   .cat-n {
-    font-size: 0.63rem;
+    font-size: var(--fs-label);
     color: var(--accent);
     font-variant-numeric: tabular-nums;
   }
@@ -153,13 +153,13 @@ const solved = comp.breakdown!.reduce((n, b) => n + b.solved, 0);
 
   .mine-label {
     margin: 0 0 0.35rem;
-    font-size: 0.62rem;
+    font-size: var(--fs-label);
   }
 
   .mine-val {
     margin: 0;
     font-size: 1.2rem;
-    font-weight: 560;
+    font-weight: 600;
     letter-spacing: -0.018em;
     font-variant-numeric: tabular-nums;
     color: var(--accent);
@@ -169,7 +169,7 @@ const solved = comp.breakdown!.reduce((n, b) => n + b.solved, 0);
     margin: 1.35rem 0 0;
     padding-top: 1.1rem;
     border-top: 1px solid var(--rule);
-    font-size: 0.92rem;
+    font-size: var(--fs-ui);
     color: var(--ink-2);
     max-width: 68ch;
   }
@@ -179,9 +179,9 @@ const solved = comp.breakdown!.reduce((n, b) => n + b.solved, 0);
     color: var(--ink);
     border: 1px solid var(--rule-2);
     padding: 0.15rem 0.45rem;
-    border-radius: 2px;
+    border-radius: var(--radius);
     margin-right: 0.6rem;
-    font-size: 0.63rem;
+    font-size: var(--fs-label);
   }
 
   @media (max-width: 560px) {

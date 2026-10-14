@@ -215,7 +215,7 @@ const families: Family[] = [
     border-bottom: 1px solid var(--rule);
   }
 
-  .solv-sub { margin: 0; font-size: 0.84rem; color: var(--ink-3); }
+  .solv-sub { margin: 0; font-size: var(--fs-sm); color: var(--ink-3); }
 
   .solv-body {
     display: grid;
@@ -293,7 +293,7 @@ const families: Family[] = [
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 0.62rem;
+    font-size: var(--fs-label);
   }
 
   .key {
@@ -324,8 +324,8 @@ const families: Family[] = [
     background: var(--accent);
     color: var(--on-accent);
     padding: 0.15rem 0.5rem;
-    font-size: 0.6rem;
-    border-radius: 2px;
+    font-size: var(--fs-label);
+    border-radius: var(--radius);
   }
 
   .badge-no { background: var(--flag); }
@@ -339,24 +339,24 @@ const families: Family[] = [
   .verdict { margin: 0.4rem 0 0; }
 
   .verdict dt {
-    font-size: 0.6rem;
+    font-size: var(--fs-label);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--ink-3);
   }
 
-  .verdict dd { margin: 0.15rem 0 0; font-size: 0.9rem; color: var(--ink); }
+  .verdict dd { margin: 0.15rem 0 0; font-size: var(--fs-ui); color: var(--ink); }
 
   .panel-step {
     margin: 0.9rem 0 0;
-    font-size: 0.9rem;
+    font-size: var(--fs-ui);
     line-height: 1.6;
     color: var(--ink-2);
   }
 
   .panel-note {
     margin: 0.8rem 0 0;
-    font-size: 0.84rem;
+    font-size: var(--fs-sm);
     line-height: 1.55;
     color: var(--ink-3);
     border-left: 2px solid var(--rule-2);
@@ -368,7 +368,7 @@ const families: Family[] = [
   figcaption {
     padding: 0.8rem 1rem 0.95rem;
     border-top: 1px solid var(--rule);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     color: var(--ink-3);
     line-height: 1.55;
   }

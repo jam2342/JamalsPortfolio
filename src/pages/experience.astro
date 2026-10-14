@@ -121,8 +121,8 @@ const others = competitions.filter((c) => !c.breakdown);
     </div>
 
     <p class="narrow skills-intro">
-      Grouped by the kind of work they support rather than listed flat. These are
-      the tools the projects on this site were actually built with.
+      Grouped by the kind of work they support. Everything listed was used to
+      build something on this site.
     </p>
 
     <div class="skill-grid">
@@ -198,7 +198,7 @@ const others = competitions.filter((c) => !c.breakdown);
 
   .role-loc {
     margin: 0.35rem 0 0;
-    font-size: 0.64rem;
+    font-size: var(--fs-label);
   }
 
   .role-org {
@@ -208,7 +208,7 @@ const others = competitions.filter((c) => !c.breakdown);
   .role-title {
     margin: 0 0 0.9rem;
     color: var(--accent);
-    font-size: 0.92rem;
+    font-size: var(--fs-ui);
   }
 
   .role-points {
@@ -223,7 +223,7 @@ const others = competitions.filter((c) => !c.breakdown);
   .role-points li {
     position: relative;
     padding-left: 1rem;
-    font-size: 0.95rem;
+    font-size: var(--fs-ui);
     color: var(--ink-2);
   }
 
@@ -249,19 +249,19 @@ const others = competitions.filter((c) => !c.breakdown);
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
-    font-size: 0.9rem;
+    font-size: var(--fs-ui);
     color: var(--ink);
-    font-weight: 520;
+    font-weight: 500;
   }
 
   .credit-mark {
     color: var(--accent);
-    font-size: 0.55rem;
+    font-size: var(--fs-label);
   }
 
   .role-flag {
     margin-top: 1rem;
-    font-size: 0.87rem;
+    font-size: var(--fs-sm);
   }
 
   /* -- Competitions -- */
@@ -292,7 +292,7 @@ const others = competitions.filter((c) => !c.breakdown);
   .comp-detail {
     margin: 0.45rem 0 0;
     color: var(--ink-2);
-    font-size: 0.94rem;
+    font-size: var(--fs-ui);
     max-width: 58ch;
   }
 
@@ -311,14 +311,14 @@ const others = competitions.filter((c) => !c.breakdown);
 
   .comp-result {
     margin: 0;
-    font-weight: 560;
-    font-size: 0.95rem;
+    font-weight: 600;
+    font-size: var(--fs-ui);
     color: var(--accent);
   }
 
   .comp-side .mono {
     margin: 0.25rem 0 0;
-    font-size: 0.66rem;
+    font-size: var(--fs-label);
   }
 
   /* -- Skills -- */
@@ -341,7 +341,7 @@ const others = competitions.filter((c) => !c.breakdown);
   .skill-head {
     margin: 0 0 0.85rem;
     color: var(--accent);
-    font-size: 0.66rem;
+    font-size: var(--fs-label);
   }
 
   .skill-block ul {
@@ -350,7 +350,7 @@ const others = competitions.filter((c) => !c.breakdown);
     padding: 0;
     display: grid;
     gap: 0.3rem;
-    font-size: 0.9rem;
+    font-size: var(--fs-ui);
     color: var(--ink-2);
   }
 
@@ -368,7 +368,7 @@ const others = competitions.filter((c) => !c.breakdown);
 
   .resume-note {
     margin: 0.35rem 0 0;
-    font-size: 0.9rem;
+    font-size: var(--fs-ui);
   }
 
   .resume-actions {

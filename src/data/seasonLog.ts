@@ -197,8 +197,8 @@ export const stops: Stop[] = [
   {
     date: "2026-10-04",
     when: "Oct 4",
-    title: "ML loses honestly",
-    text: "On an honest replay a fuel-rate formula beat the model, so the formula shipped.",
+    title: "The formula beats ML",
+    text: "On an as-of replay a fuel-rate formula beat the model, so the formula shipped.",
     stat: "74.9%",
   },
   {

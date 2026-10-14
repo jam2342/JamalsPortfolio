@@ -49,8 +49,8 @@ const project = projects.find((p) => p.id === "cyberpatriot")!;
       </dl>
 
       <p class="note case-note">
-        This page describes how the system is built and why. It deliberately
-        omits specific checks, registry paths, and detection logic. That detail is
+        This page describes how the system is built and why. It leaves out
+        specific checks, registry paths, and detection logic on purpose. That detail is
         more useful to someone evading controls than to someone evaluating the
         engineering.
       </p>
@@ -72,7 +72,7 @@ const project = projects.find((p) => p.id === "cyberpatriot")!;
       <h2 class="h-lg sec-title" id="problem">The problem</h2>
 
       <p>
-        CyberPatriot hands you a deliberately compromised Windows image and a
+        CyberPatriot hands you a compromised Windows image and a
         clock. Somewhere in it are misconfigured policies, unauthorized accounts,
         disabled protections, and things installed to persist. You find and fix
         as much as you can before time runs out.
@@ -153,10 +153,10 @@ const project = projects.find((p) => p.id === "cyberpatriot")!;
       <h2 class="h-lg sec-title narrow" id="safety">Not breaking the machine</h2>
 
       <p class="narrow">
-        Most of the engineering effort here went into the parts that prevent
-        damage rather than the parts that apply settings. Applying a registry
-        change is a line of PowerShell. Making it safe to apply hundreds of them
-        under time pressure is the actual work.
+        Most of the effort went into not causing damage. Applying a registry
+        change is one line of PowerShell. Applying hundreds of them under time
+        pressure without breaking the machine is what the rest of the code is
+        for.
       </p>
 
       <div class="narrow">
@@ -164,10 +164,9 @@ const project = projects.find((p) => p.id === "cyberpatriot")!;
           <summary>Every destructive run writes its own undo</summary>
           <p>
             Before a run modifies anything, it captures the relevant current
-            state and generates a revert script from it. The rollback isn't a
-            documented procedure someone has to remember. It's a file sitting next to
-            the backup, generated from what the machine actually looked like a
-            moment ago.
+            state and generates a revert script from it. Nobody has to remember
+            a rollback procedure: the script sits next to the backup, built from
+            what the machine looked like a moment ago.
           </p>
         </details>
 
@@ -229,8 +228,7 @@ const project = projects.find((p) => p.id === "cyberpatriot")!;
         tier, not to every team in the competition. And it was a first-day
         standing, not a final placement, because scores move a lot over the
         remaining rounds and ours did too. The screenshot below is one
-        leaderboard on one morning. It is here because it is real, not because
-        it is where we finished.
+        leaderboard on one morning, not our final result.
       </p>
 
       <Figure
@@ -248,17 +246,17 @@ const project = projects.find((p) => p.id === "cyberpatriot")!;
 
       <p>
         The framework is around 11,900 lines of PowerShell across roughly 170
-        functions. That number is a consequence of coverage rather than a goal. It's
-        what it took to express hundreds of checks in both an audit and a
-        remediation form, across three target configurations, with backup and
-        rollback around the ones that change state.
+        functions. The size comes from coverage: hundreds of checks, each
+        written in an audit form and a remediation form, across three target
+        configurations, with backup and rollback around the ones that change
+        state.
       </p>
 
       <p>
         The structure is what keeps it maintainable: baselines live in data files
         rather than in code, so adding or adjusting a check doesn't mean editing
         control flow. Windows Server 2019 and 2022 have their own registry
-        mappings, and the target is selected at run time rather than assumed.
+        mappings, and the target is selected at run time.
       </p>
     </section>
 
@@ -267,16 +265,15 @@ const project = projects.find((p) => p.id === "cyberpatriot")!;
 
       <p>
         The competition framing made one lesson unavoidable: an automated system
-        that acts on production state needs to be designed around the assumption
-        that it will be wrong sometimes. Not might be. Will be, because the machine
-        will be in a state you didn't anticipate.
+        that acts on production state has to be designed on the assumption that
+        it will sometimes be wrong, because the machine will eventually be in a
+        state you didn't plan for.
       </p>
 
       <p>
         Read-only by default, explicit confirmation, generated rollback, and
-        recorded evidence aren't features bolted on for safety. They're what
-        makes it reasonable to let a script make hundreds of security decisions
-        on a system you care about. That's the same principle the review loop in{" "}
+        recorded evidence are what make it reasonable to let a script make
+        hundreds of security decisions on a system you care about. That's the same principle the review loop in{" "}
         <a href="/work/frcmob/">FRCMOB</a> is built on, arrived at from a
         completely different direction.
       </p>
@@ -348,7 +345,7 @@ const project = projects.find((p) => p.id === "cyberpatriot")!;
     padding: 0;
     display: grid;
     gap: 0.3rem;
-    font-size: 0.9rem;
+    font-size: var(--fs-ui);
     color: var(--ink-2);
   }
 

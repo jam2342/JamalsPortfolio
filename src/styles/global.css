@@ -32,6 +32,12 @@
   --page: 1180px;
   --gutter: clamp(1.25rem, 5vw, 4rem);
 
+  /* Type ramp below body size. Every small label, caption and UI string uses
+     one of these three; nothing on the page renders under 11px. */
+  --fs-label: 0.6875rem; /* 11px, mono labels */
+  --fs-sm: 0.8125rem; /* 13px, captions and fine print */
+  --fs-ui: 0.9375rem; /* 15px, secondary prose and controls */
+
   --step: clamp(3.5rem, 8vw, 6.5rem);
   --radius: 2px;
 }
@@ -150,7 +156,7 @@ canvas {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
-  border-radius: 2px;
+  border-radius: var(--radius);
 }
 
 ::selection {
@@ -216,7 +222,7 @@ hr {
 
 .mono {
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: var(--fs-label);
   letter-spacing: 0.11em;
   text-transform: uppercase;
   color: var(--ink-3);
@@ -253,7 +259,7 @@ hr {
 .h-sm {
   font-size: 1.075rem;
   letter-spacing: -0.012em;
-  font-weight: 580;
+  font-weight: 600;
 }
 
 /* A section label with a rule running to the right edge. */
@@ -282,8 +288,8 @@ hr {
   border: 1px solid var(--accent);
   background: var(--accent);
   color: var(--on-accent);
-  font-size: 0.9rem;
-  font-weight: 520;
+  font-size: var(--fs-ui);
+  font-weight: 500;
   text-decoration: none;
   border-radius: var(--radius);
   transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
@@ -316,8 +322,8 @@ hr {
   gap: 0.45rem;
   color: var(--accent);
   text-decoration: none;
-  font-weight: 520;
-  font-size: 0.95rem;
+  font-weight: 500;
+  font-size: var(--fs-ui);
 }
 
 .arrow::after {
@@ -335,12 +341,12 @@ hr {
 
 .tag {
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: var(--fs-label);
   letter-spacing: 0.06em;
   color: var(--ink-3);
   border: 1px solid var(--rule);
   padding: 0.2rem 0.5rem;
-  border-radius: 2px;
+  border-radius: var(--radius);
   white-space: nowrap;
 }
 
@@ -348,7 +354,7 @@ hr {
   border-left: 2px solid var(--flag);
   padding: 0.15rem 0 0.15rem 1rem;
   color: var(--ink-2);
-  font-size: 0.93rem;
+  font-size: var(--fs-ui);
 }
 
 /* Definition grid for compact technical metadata. */
@@ -365,12 +371,12 @@ hr {
   gap: 1rem;
   padding: 0.62rem 0;
   border-bottom: 1px solid var(--rule);
-  font-size: 0.9rem;
+  font-size: var(--fs-ui);
 }
 
 .meta-grid dt {
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: var(--fs-label);
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--ink-3);
@@ -394,8 +400,8 @@ details.tech summary {
   display: flex;
   align-items: baseline;
   gap: 0.75rem;
-  font-weight: 520;
-  font-size: 0.98rem;
+  font-weight: 500;
+  font-size: var(--fs-ui);
 }
 
 details.tech summary::-webkit-details-marker {
@@ -406,7 +412,7 @@ details.tech summary::before {
   content: "+";
   font-family: var(--mono);
   color: var(--accent);
-  font-size: 0.95rem;
+  font-size: var(--fs-ui);
   transition: transform 0.2s ease;
 }
 
@@ -417,7 +423,7 @@ details.tech[open] summary::before {
 details.tech > *:not(summary) {
   margin-top: 0.85rem;
   color: var(--ink-2);
-  font-size: 0.95rem;
+  font-size: var(--fs-ui);
   max-width: var(--measure);
 }
 
@@ -511,6 +517,10 @@ details.tech > *:not(summary) {
   border-bottom: 1px solid var(--rule);
 }
 
+.record-head p {
+  margin: 0;
+}
+
 .record-head .live {
   color: var(--accent);
 }
@@ -532,6 +542,7 @@ details.tech > *:not(summary) {
 }
 
 .record-v {
+  margin: 0;
   font-size: clamp(1.5rem, 2.6vw, 1.95rem);
   font-weight: 600;
   letter-spacing: -0.025em;
@@ -544,7 +555,7 @@ details.tech > *:not(summary) {
 
 .record-d {
   margin: 0.3rem 0 0;
-  font-size: 0.84rem;
+  font-size: var(--fs-sm);
   color: var(--ink-2);
   line-height: 1.45;
 }

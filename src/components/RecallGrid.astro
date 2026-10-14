@@ -135,8 +135,8 @@ const views = [
     Every figure is the detector's own evaluation output: v1 on its validation
     split, v2 and v4 on the same {detector.holdoutImages} frames from{" "}
     {detector.holdoutEvent} that were held out of training, each at its own
-    shipped cutoff. Precision stays high throughout, which matters — what it
-    does report is usually real. Recall is what falls over, and recall is what
+    shipped cutoff. Precision stays high throughout, so what it does report
+    is usually real. Recall is what falls over, and recall is what
     a scouting record depends on.
   </figcaption>
 </figure>
@@ -158,20 +158,20 @@ const views = [
     border-bottom: 1px solid var(--rule);
   }
 
-  .rg-sub { margin: 0.25rem 0 0; font-size: 0.84rem; color: var(--ink-3); max-width: 46ch; }
+  .rg-sub { margin: 0.25rem 0 0; font-size: var(--fs-sm); color: var(--ink-3); max-width: 46ch; }
 
   .seg { display: flex; flex-wrap: wrap; gap: 0.3rem; }
 
   .chip {
     font-family: var(--mono);
-    font-size: 0.66rem;
+    font-size: var(--fs-label);
     letter-spacing: 0.06em;
     padding: 0.3rem 0.6rem;
     border: 1px solid var(--rule-2);
     background: transparent;
     color: var(--ink-3);
     cursor: pointer;
-    border-radius: 2px;
+    border-radius: var(--radius);
     white-space: nowrap;
   }
 
@@ -223,7 +223,7 @@ const views = [
 
   .readout { min-width: 0; }
 
-  .rg-note { margin: 0.2rem 0 0; font-size: 0.82rem; color: var(--ink-3); }
+  .rg-note { margin: 0.2rem 0 0; font-size: var(--fs-sm); color: var(--ink-3); }
 
   .big {
     margin: 0.9rem 0 0;
@@ -239,7 +239,7 @@ const views = [
   .rg-stats { display: flex; gap: 1.8rem; margin: 0.9rem 0 0; }
 
   .rg-stats dt {
-    font-size: 0.6rem;
+    font-size: var(--fs-label);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -249,7 +249,7 @@ const views = [
 
   .rg-mean {
     margin: 1rem 0 0;
-    font-size: 0.88rem;
+    font-size: var(--fs-ui);
     line-height: 1.6;
     color: var(--ink-2);
     max-width: 46ch;
@@ -258,7 +258,7 @@ const views = [
   figcaption {
     padding: 0.8rem 1rem 0.95rem;
     border-top: 1px solid var(--rule);
-    font-size: 0.82rem;
+    font-size: var(--fs-sm);
     color: var(--ink-3);
     line-height: 1.55;
   }

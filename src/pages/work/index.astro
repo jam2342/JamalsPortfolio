@@ -131,14 +131,14 @@ import { projects, allTags } from "../../data/projects";
 
   .chip {
     font-family: var(--mono);
-    font-size: 0.68rem;
+    font-size: var(--fs-label);
     letter-spacing: 0.05em;
     padding: 0.25rem 0.55rem;
     border: 1px solid var(--rule);
     background: transparent;
     color: var(--ink-3);
     cursor: pointer;
-    border-radius: 2px;
+    border-radius: var(--radius);
   }
 
   .chip:hover { color: var(--ink); border-color: var(--rule-2); }
@@ -183,7 +183,7 @@ import { projects, allTags } from "../../data/projects";
     padding-left: 0.7rem;
   }
 
-  .row-n { font-size: 0.66rem; }
+  .row-n { font-size: var(--fs-label); }
   .row.is-on .row-n { color: var(--accent); }
 
   .row-body { display: block; min-width: 0; }
@@ -197,13 +197,13 @@ import { projects, allTags } from "../../data/projects";
 
   .row-kind {
     display: block;
-    font-size: 0.63rem;
+    font-size: var(--fs-label);
     margin-top: 0.15rem;
     text-transform: none;
     letter-spacing: 0.04em;
   }
 
-  .row-year { font-size: 0.63rem; }
+  .row-year { font-size: var(--fs-label); }
 
   /* -- right stage -- */
   .stage {
@@ -247,7 +247,7 @@ import { projects, allTags } from "../../data/projects";
     margin: 0.5rem 0 0;
     text-transform: none;
     letter-spacing: 0.05em;
-    font-size: 0.72rem;
+    font-size: var(--fs-label);
   }
 
   .panel-blurb {
@@ -268,11 +268,11 @@ import { projects, allTags } from "../../data/projects";
     gap: 1rem;
     padding: 0.5rem 0;
     border-bottom: 1px solid var(--rule);
-    font-size: 0.88rem;
+    font-size: var(--fs-ui);
   }
 
   .panel-meta dt {
-    font-size: 0.63rem;
+    font-size: var(--fs-label);
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -291,11 +291,11 @@ import { projects, allTags } from "../../data/projects";
 
   .stack-g {
     display: block;
-    font-size: 0.62rem;
+    font-size: var(--fs-label);
     color: var(--accent);
   }
 
-  .stack-i { font-size: 0.85rem; color: var(--ink-2); }
+  .stack-i { font-size: var(--fs-sm); color: var(--ink-2); }
 
   .panel-acts {
     display: flex;
@@ -305,7 +305,7 @@ import { projects, allTags } from "../../data/projects";
     margin-top: 1.9rem;
   }
 
-  .panel-private { font-size: 0.63rem; }
+  .panel-private { font-size: var(--fs-label); }
 
   .empty { padding-top: 1rem; }
 

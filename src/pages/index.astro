@@ -50,8 +50,8 @@ const areas = [
       </p>
 
       <h1 class="hero-title">
-        Computer vision, security automation,<br />and robots for kids who've<br
-        /><span class="hero-em">never soldered.</span>
+        Computer vision, security automation,{" "}<br />and robots for kids
+        who've{" "}<br /><span class="hero-em">never soldered.</span>
       </h1>
 
       <p class="lede hero-lede">
@@ -227,7 +227,7 @@ const areas = [
     font-weight: 600;
   }
 
-  .hero-em { color: var(--accent); }
+  .hero-em { color: var(--accent); white-space: nowrap; }
 
   .hero-lede { margin: 1.6rem 0 0; max-width: 56ch; }
 
@@ -235,7 +235,7 @@ const areas = [
     margin: 1.1rem 0 0;
     max-width: 56ch;
     color: var(--ink-2);
-    font-size: 0.95rem;
+    font-size: var(--fs-ui);
   }
 
   .hero-actions {
@@ -286,7 +286,7 @@ const areas = [
     margin: 0;
     max-width: 62ch;
     color: var(--ink-2);
-    font-size: 0.95rem;
+    font-size: var(--fs-ui);
   }
 
   .bleed-more { margin: 1.4rem 0 0; }
@@ -313,9 +313,9 @@ const areas = [
   .areas-list > li:nth-child(3) { margin-top: 4.8rem; }
   .areas-list > li:nth-child(4) { margin-top: 7.2rem; }
 
-  .area-n { margin: 0 0 0.7rem; color: var(--accent); font-size: 0.66rem; }
+  .area-n { margin: 0 0 0.7rem; color: var(--accent); font-size: var(--fs-label); }
   .area-t { font-size: 1.02rem; margin-bottom: 0.5rem; }
-  .area-b { margin: 0; font-size: 0.88rem; color: var(--ink-2); line-height: 1.55; }
+  .area-b { margin: 0; font-size: var(--fs-ui); color: var(--ink-2); line-height: 1.55; }
 
   /* ---------- 4. horizontal rail ---------- */
   .rail-sec { padding-block: clamp(2rem, 5vw, 3.5rem); }
@@ -365,11 +365,11 @@ const areas = [
     transform: translateY(-2px);
   }
 
-  .strip-n { margin: 0; color: var(--accent); font-size: 0.64rem; }
+  .strip-n { margin: 0; color: var(--accent); font-size: var(--fs-label); }
   .strip-t { font-size: 1.08rem; margin: 0.55rem 0 0.2rem; }
-  .strip-k { margin: 0; font-size: 0.6rem; text-transform: none; letter-spacing: 0.04em; }
-  .strip-s { margin: 0.7rem 0 0; font-size: 0.85rem; color: var(--ink-2); line-height: 1.5; }
-  .strip-y { margin: 0.9rem 0 0; font-size: 0.6rem; }
+  .strip-k { margin: 0; font-size: var(--fs-label); text-transform: none; letter-spacing: 0.04em; }
+  .strip-s { margin: 0.7rem 0 0; font-size: var(--fs-sm); color: var(--ink-2); line-height: 1.5; }
+  .strip-y { margin: 0.9rem 0 0; font-size: var(--fs-label); }
 
   /* ---------- 5. offset competition split ---------- */
   .comp-sec {
@@ -384,7 +384,7 @@ const areas = [
 
   .comp-note {
     margin: 0.9rem 0 0;
-    font-size: 0.88rem;
+    font-size: var(--fs-ui);
     color: var(--ink-2);
     line-height: 1.55;
   }
@@ -401,10 +401,10 @@ const areas = [
   }
 
   .comp:last-child { border-bottom: 1px solid var(--rule); }
-  .comp-detail { margin: 0.4rem 0 0; color: var(--ink-2); font-size: 0.9rem; max-width: 58ch; }
+  .comp-detail { margin: 0.4rem 0 0; color: var(--ink-2); font-size: var(--fs-ui); max-width: 58ch; }
   .comp-side { text-align: right; }
-  .comp-result { margin: 0; font-weight: 600; font-size: 0.92rem; color: var(--accent); }
-  .comp-side .mono { margin: 0.2rem 0 0; font-size: 0.62rem; }
+  .comp-result { margin: 0; font-weight: 600; font-size: var(--fs-ui); color: var(--accent); }
+  .comp-side .mono { margin: 0.2rem 0 0; font-size: var(--fs-label); }
 
   /* ---------- closing ---------- */
   .closing {
@@ -417,6 +417,8 @@ const areas = [
 
   @media (max-width: 1000px) {
     .hero { grid-template-columns: 1fr; }
+    /* The hand-set breaks only work at full width; narrower, let balance do it. */
+    .hero-title br { display: none; }
     .hero-rail { position: static; }
     .rail-grid { grid-template-columns: repeat(2, 1fr); }
     .rail-grid > div:nth-child(odd) { border-right: 1px solid var(--rule); }

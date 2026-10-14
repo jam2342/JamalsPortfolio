@@ -18,7 +18,7 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
     <h1 class="h-lg">Research and writing</h1>
     <p class="lede narrow">
       Two pieces of formal research: an extended essay on how far Itô calculus
-      actually gets you when solving stochastic differential equations, and a
+      gets you when solving stochastic differential equations, and a
       completed physics investigation into temperature and capacitor discharge
       that came out of robotics.
     </p>
@@ -50,8 +50,7 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
           might give you an explicit formula for the path, or a known
           distribution at a fixed time, or closed expressions for moments, without
           giving you all three. Itô calculus applies to all four models
-          in the paper. What varies is how much exactness you actually get out
-          of it.
+          in the paper. What varies is how much exactness you get out of it.
         </p>
 
         <p>
@@ -109,9 +108,8 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
         </p>
 
         <p>
-          That second-order term is worth pausing on, because it's the whole
-          reason stochastic calculus looks different from the calculus everyone
-          learns first. Subdivide a Brownian path and add up the squared
+          It's worth pausing on, because it's why stochastic calculus looks so
+          different from the calculus everyone learns first. Subdivide a Brownian path and add up the squared
           increments: the sum doesn't vanish the way it would for a smooth
           curve. It converges to the elapsed time. Try it below.
         </p>
@@ -121,9 +119,9 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
 
       <div class="narrow paper-body">
         <p>
-          The comparison is the part I designed deliberately. Each of the four
-          models changes exactly one structural feature, which turns the survey
-          into something closer to a controlled experiment.
+          I picked the four models so that each one changes exactly one
+          structural feature, which turns the survey into something closer to a
+          controlled experiment.
         </p>
       </div>
 
@@ -195,7 +193,7 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
       <div class="narrow paper-body">
 
         <p>
-          The result is a gradient rather than a line. GBM and OU satisfy all
+          The result is a gradient, not a clean dividing line. GBM and OU satisfy all
           three criteria, giving explicit path formulas, recognizable finite-time
           distributions, and closed expressions for moments. CIR loses the
           elementary path formula but keeps an exact transition law, a noncentral
@@ -208,7 +206,7 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
 
         <p>
           So drift, diffusion, and boundary behavior between them determine which
-          kind of exact result you can have, to a large but genuinely limited extent.
+          kind of exact result you can have, to a large but limited extent.
           That's the argument.
         </p>
       </div>
@@ -331,8 +329,7 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
           This one came directly out of robotics. Part of what I did at
           competition was manage the battery and electrical system, and
           components that have been running for a while are warm. I wanted to
-          know whether that actually changes their behavior in a way you could
-          measure.
+          know whether that changes their behavior in a way you could measure.
         </p>
 
         <p>
@@ -370,9 +367,9 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
           against <Math label="t">t</Math> is a straight line of gradient{" "}
           <Math label="m equals minus one over tau">m = −1/τ</Math>, and{" "}
           <Math label="tau equals minus one over m">τ = −1/m</Math> falls
-          straight out of the regression. Linearizing rather than curve-fitting
-          was deliberate: departures from exponential behavior show up as visible
-          curvature instead of hiding inside a fit.
+          straight out of the regression. I linearized instead of curve-fitting
+          so that any departure from exponential behavior would show up as
+          visible curvature, not hide inside a fit.
         </p>
 
         <div class="ia-results">
@@ -396,8 +393,8 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
 
         <p>
           τ fell monotonically across the range, and the step between adjacent
-          temperatures was about six times the measurement uncertainty, so the effect
-          is real rather than noise. Every linearized fit had R² above 0.9995,
+          temperatures was about six times the measurement uncertainty, so the
+          effect isn't noise. Every linearized fit had R² above 0.9995,
           which also confirms the discharge stayed single-exponential throughout.
         </p>
 
@@ -430,9 +427,9 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
             Rather than take a single regression gradient at face value, I wrote
             the analysis in Python and searched for the extreme gradients still
             consistent with every point's error bar: the steepest and shallowest lines
-            that stay feasible given ±0.01 V on each reading. That
-            bounds the gradient honestly instead of reporting a fit statistic as
-            though it were an uncertainty.
+            that stay feasible given ±0.01 V on each reading. That gives a real
+            bound on the gradient, instead of reporting a fit statistic as though
+            it were an uncertainty.
           </p>
           <p>
             The uncertainty in <Math label="tau">τ</Math> then follows from the
@@ -504,11 +501,11 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
       </p>
 
       <p>
-        The extended essay connects less directly but more deeply. Ratings in{" "}
+        The extended essay connects less directly. Ratings in{" "}
         <a href="/work/frcmob/">FRCMOB</a> are an estimation problem under
         uncertainty: you're inferring a team's strength from a small, noisy,
-        unevenly distributed sample, and the honest version of that answer
-        carries a confidence with it. Asking how far exact analysis will take you
+        unevenly distributed sample, and any answer worth giving comes with a
+        measure of how sure you are. Asking how far exact analysis will take you
         before you have to simulate is the same question as asking how much a
         rating built on four matches is really telling you.
       </p>
@@ -575,8 +572,8 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
     border: 1px solid var(--flag);
     color: var(--flag);
     padding: 0.28rem 0.6rem;
-    border-radius: 2px;
-    font-size: 0.64rem;
+    border-radius: var(--radius);
+    font-size: var(--fs-label);
     white-space: nowrap;
   }
 
@@ -616,13 +613,13 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
 
   .model-h {
     margin: 0;
-    font-size: 0.94rem;
-    font-weight: 520;
+    font-size: var(--fs-ui);
+    font-weight: 500;
   }
 
   .model-note {
     margin: 0;
-    font-size: 0.87rem;
+    font-size: var(--fs-sm);
     color: var(--ink-3);
     line-height: 1.5;
   }
@@ -657,13 +654,13 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
 
   .ia-label {
     margin: 0 0 0.4rem;
-    font-size: 0.62rem;
+    font-size: var(--fs-label);
   }
 
   .ia-val {
     margin: 0;
     font-size: 1.05rem;
-    font-weight: 560;
+    font-weight: 600;
     letter-spacing: -0.015em;
     font-variant-numeric: tabular-nums;
   }
@@ -683,6 +680,6 @@ const smt = competitions.find((c) => c.name === "Stanford Math Tournament")!;
 
   .smt-line {
     margin-bottom: 0.9rem;
-    font-size: 0.94rem;
+    font-size: var(--fs-ui);
   }
 </style>

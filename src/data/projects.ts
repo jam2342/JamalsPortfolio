@@ -42,7 +42,7 @@ export const projects: Project[] = [
     title: "FRCMOB",
     kind: "Scouting and match-analysis platform",
     summary:
-      "A full scouting platform for FIRST Robotics teams: team workspaces and live rooms, offline event packs, honestly tested match predictions, and a match breakdown that runs on the scout's phone.",
+      "A full scouting platform for FIRST Robotics teams: team workspaces and live rooms, offline event packs, match predictions scored on matches they never saw, and a match breakdown that runs on the scout's phone.",
     blurb:
       "Built and deployed for FRC Team 5417, this full-stack, open-source platform supports team workspaces, live multi-scout rooms, offline event packs, match predictions, and a computer-vision breakdown that runs in the browser on the scout's phone. I began it in February 2026 and keep working on on-device analysis, native apps, and readiness for the 2027 season.",
     years: "February 2026–present",
@@ -73,7 +73,7 @@ export const projects: Project[] = [
     summary:
       "An 11,900-line PowerShell system that audits, hardens, and remediates Windows and Windows Server images with rollback safety.",
     blurb:
-      "Built for CyberPatriot, this is an auditing and remediation engine rather than a pile of commands. It inspects system state, reports findings as evidence before it changes anything, applies policy against CIS-style baselines, and writes a revert script before every destructive operation.",
+      "Built for CyberPatriot. It inspects system state and reports what it finds before it changes anything, applies policy against CIS-style baselines, and writes a revert script before every destructive operation.",
     years: "2025–present",
     tags: ["Security", "Automation", "Systems"],
     meta: [
@@ -97,9 +97,9 @@ export const projects: Project[] = [
     title: "Practical Cryptography",
     kind: "Course and assessment design",
     summary:
-      "A 43-lecture cryptography course built around a deliberately broken application students must audit and decide whether to release.",
+      "A 43-lecture cryptography course that ends with a broken application. Students audit it and decide whether it ships.",
     blurb:
-      "Most cryptography courses stop at definitions. This one ends with a release-candidate application that has real defects planted in it. Students build a testing framework, find what's wrong, preserve evidence, and write a defensible decision about whether the software ships.",
+      "The course runs from AES modes through TLS and JWTs, then ends with a release-candidate application that has real defects planted in it. Students build a testing framework, find what's wrong, preserve evidence, and write a defensible decision about whether the software ships.",
     years: "2026",
     tags: ["Security", "Education", "Software engineering"],
     meta: [
@@ -127,7 +127,7 @@ export const projects: Project[] = [
     years: "2024–present",
     tags: ["Robotics", "Embedded", "Education", "Leadership"],
     meta: [
-      { label: "Role", value: "President — camps, curriculum, officer training" },
+      { label: "Role", value: "President: camps, curriculum, officer training" },
       { label: "Kit design", value: "Club lineage; not my work" },
       { label: "Audience", value: "Grades 3–8" },
       { label: "Hardware", value: "Raspberry Pi Pico; earlier Arduino" },
