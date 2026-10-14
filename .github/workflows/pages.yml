@@ -31,8 +31,13 @@ jobs:
       - run: npm ci
 
       # Builds with BASE_PATH/SITE_URL set, then prefixes the root-absolute
-      # links Astro leaves alone. See scripts/base-rewrite.mjs.
+      # links Astro leaves alone. See scripts/base-rewrite.mjs. The same
+      # workflow runs in both repos (js-portfolio and the JamalsPortfolio
+      # mirror), so the base path comes from whichever repo is building.
       - run: npm run build:pages
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}
+          SITE_URL: https://${{ github.repository_owner }}.github.io
 
       - uses: actions/configure-pages@v5
 

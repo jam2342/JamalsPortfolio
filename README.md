@@ -52,6 +52,19 @@ figures are still Astro components in `src/components/` (`FieldTracker`,
 page and move into a card when its dot opens. Inside a card they always use
 their own small-screen layout.
 
+## Deploying
+
+Pushing `main` to `origin` (jam2342/js-portfolio) deploys Vercel and
+`jam2342.github.io/js-portfolio/`. The `pages` remote (jam2342/JamalsPortfolio)
+is a mirror for `jam2342.github.io/JamalsPortfolio/`; push `main` there too:
+
+```bash
+git push origin main && git push pages main
+```
+
+Both repos run the same `.github/workflows/pages.yml`, which takes the base
+path from the repo's own name.
+
 ## Résumé
 
 `public/Jamal_Mammadzada_Resume.pdf` and `.docx`. Both are linked from the site.

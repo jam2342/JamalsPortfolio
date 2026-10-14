@@ -10,7 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "build:pages": "BASE_PATH=/JamalsPortfolio SITE_URL=https://jam2342.github.io astro build && BASE_PATH=/JamalsPortfolio node scripts/base-rewrite.mjs",
+    "build:pages": "BASE_PATH=${BASE_PATH:-/JamalsPortfolio} SITE_URL=${SITE_URL:-https://jam2342.github.io} astro build && BASE_PATH=${BASE_PATH:-/JamalsPortfolio} SITE_URL=${SITE_URL:-https://jam2342.github.io} node scripts/base-rewrite.mjs",
     "map:docs": "node scripts/map/export_docs.mjs"
   },
   "dependencies": {

@@ -19,6 +19,8 @@ if (!BASE) {
 }
 
 const base = BASE.replace(/\/$/, '');
+// Canonical URLs are absolute, so they need the site origin to be rewritten.
+const SITE = (process.env.SITE_URL || '').replace(/\/$/, '');
 const DIST = 'dist';
 
 async function* walk(dir) {
@@ -60,6 +62,21 @@ for await (const file of walk(DIST)) {
       .join(',');
     return `${lead}${q}${fixed}${q}`;
   });
+
+  // Redirect pages (astro.config.mjs `redirects`): the meta refresh target
+  // and the canonical URL are written without the base path.
+  out = out.replace(/(<meta http-equiv="refresh" content="\d+;\s*url=)\/(?!\/)([^"]*)"/g, (m, lead, rest) => {
+    if (`/${rest}`.startsWith(`${base}/`)) return m;
+    edits += 1;
+    return `${lead}${base}/${rest}"`;
+  });
+  if (SITE) {
+    out = out.replace(/(<link rel="canonical" href=")([^"]*)"/g, (m, lead, url) => {
+      if (!url.startsWith(SITE + '/') || url.startsWith(SITE + base + '/')) return m;
+      edits += 1;
+      return `${lead}${SITE}${base}${url.slice(SITE.length)}"`;
+    });
+  }
 
   if (out !== original) {
     await writeFile(file, out);

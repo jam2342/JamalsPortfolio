@@ -244,7 +244,7 @@ const { nodes, links, byId, ctf } = buildGraph();
   const sel = d3.select(canvas).call(zoom).on("dblclick.zoom", null);
   const go = (tr, ms) => (reduce || !ms ? sel : sel.transition().duration(ms).ease(d3.easeCubicInOut)).call(zoom.transform, tr);
   function cardBox() {
-    if (narrow()) return { x0: 16, x1: W - 16, y0: 56, y1: H * 0.4 - 8 };
+    if (narrow()) return { x0: 16, x1: W - 16, y0: 56, y1: card.classList.contains("full") ? 56 + 60 : H * 0.4 - 8 };
     const cw = Math.min($("card").classList.contains("wide") ? 1024 : 464, W - 32);
     return { x0: 16, x1: W - cw - 32, y0: 120, y1: H - 24 };
   }
@@ -255,7 +255,9 @@ const { nodes, links, byId, ctf } = buildGraph();
     go(d3.zoomIdentity.translate(cx, cy).scale(k).translate(-(x0 + x1) / 2, -(y0 + y1) / 2), ms);
   }
   function fit(ms) {
-    const v = { x0: 16, x1: W - 16, y0: narrow() ? 230 : 36, y1: H - (narrow() ? 64 : 110) };
+    // on phones the map starts below the intro, whatever height it wraps to
+    const introBottom = document.querySelector(".intro").getBoundingClientRect().bottom - $("app").getBoundingClientRect().top;
+    const v = { x0: 16, x1: W - 16, y0: narrow() ? introBottom + 40 : 36, y1: H - (narrow() ? 104 : 110) };
     fitBox(d3.min(nodes, (n) => n.x) - 30, d3.max(nodes, (n) => n.x) + 30, d3.min(nodes, (n) => n.y) - 40, d3.max(nodes, (n) => n.y) + 20, v, 1.8, ms);
   }
   function frameOn(n) {
@@ -268,9 +270,9 @@ const { nodes, links, byId, ctf } = buildGraph();
      Hover, edge reasons, clicks
      ================================================================= */
   const tag = $("hover-tag");
-  function pick(px, py) {
+  function pick(px, py, tol = 8) {
     let best = null, bd = Infinity;
-    nodes.forEach((n) => { const [x, y] = P(n), d = Math.hypot(px - x, py - y); if (d < rad(n) + 8 && d < bd) { bd = d; best = n; } });
+    nodes.forEach((n) => { const [x, y] = P(n), d = Math.hypot(px - x, py - y); if (d < rad(n) + tol && d < bd) { bd = d; best = n; } });
     return best;
   }
   function pickLink(px, py) {
@@ -310,7 +312,7 @@ const { nodes, links, byId, ctf } = buildGraph();
   sel.on("click", (e) => {
     if (!ready) return;
     const r = canvas.getBoundingClientRect();
-    const n = pick(e.clientX - r.left, e.clientY - r.top);
+    const n = pick(e.clientX - r.left, e.clientY - r.top, e.pointerType === "touch" ? 22 : 8);
     if (n) openNode(n); else if (open) closeAll();
   });
 
@@ -451,6 +453,14 @@ const { nodes, links, byId, ctf } = buildGraph();
   // when needed and parked again before the card's content is replaced.
   const store = document.getElementById("legacy-store");
   function parkLegacy() { card.querySelectorAll("[data-legacy]").forEach((el) => store.append(el)); }
+  $("expand").addEventListener("click", () => {
+    const full = !card.classList.contains("full");
+    card.classList.toggle("full", full);
+    $("expand").setAttribute("aria-expanded", String(full));
+    $("expand").textContent = full ? "Shrink" : "Expand";
+    if (open) frameOn(open);
+    draw();
+  });
   function showCard(html, color, wide) {
     const was = !card.hidden;
     parkLegacy();
@@ -600,7 +610,8 @@ const { nodes, links, byId, ctf } = buildGraph();
     el.className = "w";
     el.innerHTML = `<div class="w-head"><b>Spot the robots</b><span data-k="count"></span></div>
       <p style="margin:0;color:var(--ink-2);font-size:.9rem">Real match frames from 2026 Texas events. You get ${SECONDS} seconds per frame: click every robot you can find.</p>
-      <div class="spot-stage" data-k="stage"><img data-k="img" alt="" draggable="false"><div data-k="layer"></div><div class="gate" data-k="gate"><button class="btn primary" type="button" data-k="start">Start · ${SECONDS} s</button></div></div>
+      <div class="spot-scroll"><div class="spot-stage" data-k="stage"><img data-k="img" alt="" draggable="false"><div data-k="layer"></div><div class="gate" data-k="gate"><button class="btn primary" type="button" data-k="start">Start · ${SECONDS} s</button></div></div></div>
+      <p class="spot-pan">Swipe sideways to see the whole field.</p>
       <div class="timer"><i data-k="fill"></i></div>
       <div class="row" data-k="playrow"><span data-k="marks" style="color:var(--ink-3);font-size:.85rem">0 marked</span><button class="btn" type="button" data-k="done" disabled>Done</button></div>
       <div data-k="reveal" hidden style="display:grid;gap:10px">
@@ -739,6 +750,12 @@ const { nodes, links, byId, ctf } = buildGraph();
     keys.querySelectorAll("[data-c]").forEach((k) => k.setAttribute("aria-pressed", String(+k.dataset.c === focusCluster)));
     draw();
   }
+  const STRIP = ["frcmob", "spot", "hardening", "crypto", "eaglets", "frc5417", "notetaker", "avmac", "ee", "ia", "pico", "about", "contact"];
+  function buildStrip() {
+    $("strip").innerHTML = STRIP.map((id) => byId.get(id)).filter(Boolean).map((n) =>
+      `<button type="button" data-go="${n.id}"><span class="swatch" style="background:${n.color}"></span><span class="s-t">${esc(n.title)}</span></button>`).join("");
+    $("strip").addEventListener("click", (e) => { const b = e.target.closest("[data-go]"); if (b) openNode(b.dataset.go); });
+  }
   function buildKeys() {
     keys.innerHTML = CL.map((c) => `<button type="button" class="tkey" data-c="${c.id}" aria-pressed="false" style="color:${c.color}"><span class="swatch" style="background:${c.color}"></span><span style="color:var(--ink)">${esc(c.name)}</span><span class="n">${c.size}</span></button>`).join("")
       + `<button type="button" class="tkey toggle" id="authored" aria-pressed="false"><span class="dash"></span><span style="color:var(--ink)">Hand-drawn links</span></button>`;
@@ -799,6 +816,7 @@ const { nodes, links, byId, ctf } = buildGraph();
   }
   function closeList() { $("list").hidden = true; $("open-list").focus(); }
   $("open-list").addEventListener("click", openList);
+  $("skip-list").addEventListener("click", (e) => { e.preventDefault(); openList(); });
   $("close-list").addEventListener("click", closeList);
   $("list").addEventListener("click", (e) => { const b = e.target.closest("[data-go]"); if (b) { $("list").hidden = true; openNode(b.dataset.go); } });
   document.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => (b.dataset.open === "method" ? openMethod() : openNode(b.dataset.open))));
@@ -812,7 +830,7 @@ const { nodes, links, byId, ctf } = buildGraph();
   window.addEventListener("resize", () => { resize(); if (open) frameOn(open); else fit(0); });
   resize();
   CONTENT = CONTENT_JSON; ML = ML_JSON;
-  addSatellites(); applyML(); buildIndex(); buildKeys();
+  addSatellites(); applyML(); buildIndex(); buildKeys(); buildStrip();
   ready = true;
   fit(0);
   if (location.hash.length > 1) route({ noHistory: true, keepFocus: true });

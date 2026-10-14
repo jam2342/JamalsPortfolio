@@ -96,12 +96,14 @@ const staticHTML = ORDER.map((id) => {
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=STIX+Two+Text:ital@0;1&display=swap" />
   </head>
   <body>
+    <a href="#" class="skip" id="skip-list">Skip the map and browse everything as a list</a>
     <div id="app">
       <canvas id="graph" aria-label="A map of Jamal Mammadzada's projects, research, teaching and competitions. Use List for a text version."></canvas>
     
       <header class="intro">
         <h1><button type="button" id="home">Jamal Mammadzada</button></h1>
-        <p>Student engineer in Allen, Texas. This whole site is one map: every dot is something I built, studied or taught, wired to the things it actually connects to.</p>
+        <p class="p-long">Student engineer in Allen, Texas. This whole site is one map: every dot is something I built, studied or taught, wired to the things it actually connects to.</p>
+        <p class="p-short">Everything I've built, studied and taught, as one map. Tap a dot, or a project below.</p>
         <div class="row">
           <button class="btn primary" id="tour" type="button">Take the tour</button>
           <div class="search">
@@ -115,17 +117,19 @@ const staticHTML = ORDER.map((id) => {
           <button type="button" data-open="contact">Contact</button>·
           <a href="/Jamal_Mammadzada_Resume.pdf" target="_blank" rel="noopener">Résumé</a>·
           <a href="https://github.com/jam2342" target="_blank" rel="noopener">GitHub</a>·
-          <button type="button" data-open="method">How this map was made</button>
+          <button type="button" data-open="method"><span class="lg">How this map was made</span><span class="sm">How it's made</span></button>
         </div>
       </header>
     
       <nav class="keys" id="keys" aria-label="Clusters found in the content"></nav>
+      <nav class="strip" id="strip" aria-label="Main projects"></nav>
       <p class="hint" id="hint">Positions come from embedding each item's text · scroll to zoom · click any dot to open it</p>
       <div class="hover-tag" id="hover-tag" hidden></div>
     
       <article class="card" id="card" hidden aria-live="polite">
         <div class="card-top">
           <nav class="crumbs" id="crumbs" aria-label="Where you are"></nav>
+          <button class="expand" id="expand" type="button" aria-expanded="false" aria-controls="card">Expand</button>
           <button class="close" id="close" type="button" aria-label="Close">×</button>
         </div>
         <div class="card-scroll" id="card-scroll"></div>
@@ -438,6 +442,63 @@ a { color: inherit; }
   .bar .track { grid-column: 1 / -1; grid-row: 2; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; transition: none !important; } }
+
+
+/* ---------- accessibility and phones ---------- */
+.skip { position: absolute; left: 16px; top: -60px; z-index: 20; background: var(--tag); color: var(--tag-ink); padding: 10px 14px; border-radius: 6px; text-decoration: none; font-weight: 500; }
+.skip:focus { top: 12px; }
+.strip, .expand, .p-short, .quick .sm { display: none; }
+@media (max-width: 720px) { .p-short { display: block; } .quick .sm { display: inline; } }
+.spot-pan { display: none; margin: 0; font-size: 0.82rem; color: var(--ink-3); }
+.spot-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 6px; }
+@media (max-width: 720px) {
+  #keys { display: none; }
+  .strip {
+    display: flex; gap: 8px; position: absolute; z-index: 3; left: 0; right: 0;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px)); padding-inline: 16px;
+    overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity;
+  }
+  .strip::-webkit-scrollbar { display: none; }
+  .strip button {
+    flex: none; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px;
+    background: rgba(12, 15, 21, 0.94); border: 1px solid var(--line); border-radius: 12px;
+    font-size: 0.95rem; color: var(--ink); cursor: pointer; scroll-snap-align: start;
+  }
+  .strip .swatch { width: 10px; height: 10px; }
+  #app.has-card .strip { display: none; }
+  .expand { display: inline-flex; align-items: center; min-height: 40px; padding: 0 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; font-size: 0.86rem; cursor: pointer; margin-left: auto; }
+  .card-top { gap: 8px; }
+  .card.full { height: calc(100% - 64px); }
+  .close { width: 40px; height: 40px; font-size: 1.15rem; }
+  .card-scroll { font-size: 16px; }
+  .content > p, .content > ul > li { font-size: 1rem; line-height: 1.6; }
+  .content > p.lede { font-size: 1.08rem; }
+  .card h2 { font-size: 1.5rem; }
+  .btn { min-height: 44px; padding-inline: 14px; }
+  .intro .btn { min-height: 44px; }
+  .search input { min-height: 44px; font-size: 16px; }
+  .quick button, .quick a { padding: 8px 0; }
+  .crumbs button { padding: 8px 6px; }
+  .nn button, .inside button { min-height: 44px; }
+  .links button { min-height: 40px; padding-inline: 12px; }
+  .timeline button { padding-block: 4px; }
+  .list li button { min-height: 44px; font-size: 1rem; }
+  .results { width: calc(100vw - 32px); }
+  .results button { min-height: 44px; }
+  .spot-stage { width: 780px; max-width: none; }
+  .spot-pan { display: block; }
+  .spot-stage .gate { place-items: center start; padding-left: 16px; }
+  .p-long { display: none; }
+  .intro .row:not(.quick) { flex-wrap: nowrap; }
+  .intro .row:not(.quick) .btn { padding-inline: 12px; }
+  .quick .lg { display: none; }
+  .expand { white-space: nowrap; }
+  .intro h1 button { min-height: 44px; }
+  .quick { gap: 4px 6px; }
+  .quick button, .quick a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 2px; }
+  .views button { min-height: 40px; padding-inline: 14px; }
+  .hover-tag { display: none; }
+}
 
 /* ---------- the store that holds the original figures while they're parked ---------- */
 #legacy-store { position: absolute; left: -10000px; top: 0; width: 27rem; }
