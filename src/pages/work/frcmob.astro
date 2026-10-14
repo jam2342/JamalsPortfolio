@@ -4,59 +4,62 @@ import FieldTracker from "../../components/FieldTracker.astro";
 import Pipeline from "../../components/Pipeline.astro";
 import ModelMetrics from "../../components/ModelMetrics.astro";
 import RecallGrid from "../../components/RecallGrid.astro";
+import SpotTheRobots from "../../components/SpotTheRobots.astro";
+import SeasonLog from "../../components/SeasonLog.astro";
 import Figure from "../../components/Figure.astro";
 import EvidenceStrip from "../../components/EvidenceStrip.astro";
 import { projects } from "../../data/projects";
-import { detector } from "../../data/model";
+import { detector, pct } from "../../data/model";
 
 const project = projects.find((p) => p.id === "frcmob")!;
+const v4 = detector.v4Data;
 
 const visionStages = [
   {
     n: "01",
-    title: "Acquire",
+    title: "Film",
     detail:
-      "A match clip is pulled from stream footage or stored video and cut down to the window that matters. Frames come out at a fixed rate so timing stays comparable between matches.",
+      "The scout films the match from the stands, or uploads a clip they already have. Everything after this happens on the phone; the video never has to reach a server.",
   },
   {
     n: "02",
-    title: "Detect",
+    title: "Calibrate",
     detail:
-      "A YOLO detector trained on competition footage finds robots in each frame. The model is single-class. It learns what a competition robot looks like, which a general-purpose model does badly.",
-    note: "Falls back to a generic model only in a degraded mode, and runs that do are flagged rather than reported as normal.",
+      "Four taps on the field corners give the image-to-field correspondences, and a homography is fit from them. The calibration frame is stored, and the first recording frame is registered against it, so a phone that moved gets asked to re-calibrate instead of producing quietly wrong positions.",
+    note: "AprilTags were the original plan. From the stands they're too small to decode, so taps became the main path.",
   },
   {
     n: "03",
-    title: "Track",
+    title: "Detect",
     detail:
-      "ByteTrack associates detections across frames into continuous tracks, so a robot keeps one identity through occlusion and traffic instead of becoming six unrelated detections.",
-    note: "Association tolerates short gaps; a motion-based estimate fills in when a robot is briefly lost.",
+      "Detector v4 runs in the browser through ONNX Runtime Web. It reads only the calibrated field area, not the whole frame. Devices with a GPU get the full model on WebGPU; the rest get a nano model on multithreaded WebAssembly.",
+    note: `v4 at a ${detector.v4.cutoff} cutoff on WebGPU, v4-nano at ${detector.v4n.cutoff} on WASM. Holdout mAP@50 ${pct(detector.v4.map50)} and ${pct(detector.v4n.map50)}.`,
   },
   {
     n: "04",
-    title: "Calibrate",
+    title: "Track",
     detail:
-      "AprilTags around the field give image-to-field point correspondences, and a homography is fit over them with RANSAC. Candidates are judged on inlier ratio and reprojection error, and rejected if the fit is poor.",
-    note: "From stands distance the tags are often unresolvable. The fallback is four corner taps from the scout, carried frame to frame by optical flow.",
+      "Detections are associated in field coordinates rather than pixels, with a speed limit a real robot can't beat, so a camera pan doesn't break a path. Fragments are then stitched conservatively: two pieces join only when the robot reappears soon, close by, and in its own alliance's colour.",
+    note: "Stitching rule: reappears within 2 s, within 0.5 m + 2 m/s of where it vanished.",
   },
   {
     n: "05",
-    title: "Map",
+    title: "Identify",
     detail:
-      "The homography converts every tracked pixel position into field coordinates. From that point on the data is spatial: positions, speeds, and zone occupancy rather than pixels.",
+      "The scout taps once per robot to say which team it is, helped by each team's robot photo and by suggestions that continue a path from where an identified robot was last seen. Suggestions are marked as suggestions; about one in ten is wrong, and the screen says so.",
   },
   {
     n: "06",
     title: "Summarize",
     detail:
-      "Tracks become metrics: zone dwell time, reconstructed cycles, disabled periods, movement profiles. Those feed the ratings engine and the draft scouting forms.",
+      "Identified paths become heat maps, zone time, and an attack-versus-defense split. Accepted runs feed Team Center and the auto-scout drafts that a human reviews.",
   },
 ];
 ---
 
 <Base
   title="FRCMOB, Jamal Mammadzada"
-  description="A case study on FRCMOB: a full-stack scouting and match-analysis platform that turns FIRST Robotics match video into reviewable strategic evidence."
+  description="A case study on FRCMOB: a full-stack FIRST Robotics scouting platform with team workspaces, offline event packs, honestly evaluated match predictions, and a computer-vision match breakdown that runs on the scout's phone."
   progress={true}
 >
   <article>
@@ -66,9 +69,10 @@ const visionStages = [
       </p>
       <h1 class="h-xl case-title">FRCMOB</h1>
       <p class="lede narrow case-lede">
-        Built and deployed for FRC Team 5417, FRCMOB is a full-stack scouting
-        and match-analysis platform supporting multi-scout data collection,
-        offline submissions, strategy analysis, and computer-vision auto-scouting.
+        Built and deployed for FRC Team 5417, FRCMOB is a full scouting platform:
+        team workspaces and live multi-scout rooms, offline event packs, match
+        predictions that were tested honestly, and a computer-vision breakdown
+        that runs on the scout's own phone.
       </p>
 
       <dl class="meta-grid case-meta">
@@ -88,7 +92,7 @@ const visionStages = [
 
       <p class="note case-note">
         FRCMOB is open source under the GNU AGPL v3. The public repository
-        includes the web app, API, worker, game configuration, deployment setup,
+        includes the web app, API, game configuration, deployment setup,
         documentation, and tests. Model weights, training data, match recordings,
         database contents, and credentials remain private.
       </p>
@@ -105,8 +109,7 @@ const visionStages = [
           class="btn btn-ghost"
           target="_blank"
           rel="noreferrer"
-        >Open the public frontend ↗</a>
-        <p class="mono">Cloud services are intentionally paused; offline tools still render.</p>
+        >Open the live app ↗</a>
       </div>
     </header>
 
@@ -114,10 +117,10 @@ const visionStages = [
       <EvidenceStrip
         label="FRCMOB evidence"
         items={[
-          { value: detector.trainImages.toLocaleString(), label: "Labeled frames", detail: `${detector.reviewedImages.toLocaleString()} manually reviewed` },
+          { value: pct(detector.v4.map50), label: "Holdout mAP@50", detail: `Detector v4 on an unseen event; v2 scored ${pct(detector.v2Rescored.map50)} on the same test` },
+          { value: "74.9%", label: "Match calls", detail: "2,507 held-out matches, each predicted from earlier results only" },
           { value: "Competition", label: "Real deployment", detail: "Used by FRC Team 5417" },
-          { value: `${(detector.v2.map50 * 100).toFixed(1)}%`, label: "Holdout mAP@50", detail: "v2 promotion benchmark" },
-          { value: "100", label: "Test files", detail: "66 backend · 34 frontend in the public repository" },
+          { value: "246", label: "Test files", detail: "94 backend · 152 frontend in the public repository" },
         ]}
       />
     </div>
@@ -145,17 +148,18 @@ const visionStages = [
       <p>
         Video doesn't have those problems. It's complete, it's re-watchable, and
         it's the same every time you look at it. The obstacle is that nobody has
-        the hours to watch it. FRCMOB is an attempt to close that gap: process
-        the footage automatically, then put a person in front of the result
-        before it counts for anything.
+        the hours to watch it. FRCMOB started as an attempt to close that gap:
+        process the footage automatically, then put a person in front of the
+        result before it counts for anything. It grew into the rest of what a
+        scouting team needs around that.
       </p>
 
       <p>
         I began FRCMOB in February 2026 for{" "}
         <a href="/work/frc5417/">my own team</a>. Team 5417 has since used the
-        platform at a real competition. I am still improving the computer-vision
-        auto-scouting, offline data collection, mobile reliability, model
-        evaluation, and strategy tools.
+        platform at a real competition. Right now I'm working on running a full
+        match breakdown on a real phone at an event, getting the native apps
+        into the stores, and getting ready for the 2027 game.
       </p>
 
       <h3 class="h-md sub-title">The design constraint that shaped everything</h3>
@@ -166,8 +170,22 @@ const visionStages = [
         answer is worse than no answer, because it gets acted on. So the system was built
         so that nothing produced by a model becomes accepted data on its own.
         Every automatic result carries a confidence value, and a human either
-        approves it, corrects specific fields, or throws it out.
+        approves it, corrects specific fields, or throws it out. The same rule
+        ended up applying to my own numbers: if I can't measure it honestly, it
+        doesn't ship.
       </p>
+    </section>
+
+    <section class="wrap section" aria-labelledby="season">
+      <h2 class="h-lg sec-title narrow" id="season">Season log</h2>
+
+      <p class="narrow">
+        Eight months, from a first commit to a platform. The spring was built
+        around competitions, with fixes landing during events. The fall was
+        about making it honest and keeping it up.
+      </p>
+
+      <SeasonLog />
     </section>
 
     <section class="wrap section" aria-labelledby="transform">
@@ -188,13 +206,13 @@ const visionStages = [
       <h2 class="h-lg sec-title narrow" id="pipeline">The vision pipeline</h2>
 
       <p class="narrow">
-        Six stages take a video file to structured spatial data. Select a stage
-        to read what it does.
+        Six stages take a scout's video to identified robot paths, and all six
+        run on the phone. Select a stage to read what it does.
       </p>
 
       <Pipeline
         id="vision-pipeline"
-        label="Video → field coordinates"
+        label="Phone video → identified paths"
         stages={visionStages}
       />
 
@@ -209,30 +227,63 @@ const visionStages = [
           </p>
           <p>
             The fallback asks the scout to tap the four field corners once. That
-            gives the same four correspondences, and optical flow carries the
-            pose forward as the camera moves, instead of trying to re-detect tags
-            every frame. It's a worse method in principle and the only one that
-            works from row 20.
+            gives the same four correspondences without needing to read a single
+            tag. It's a worse method in principle and the only one that works
+            from row 20, which is why it's now the main path rather than the
+            backup.
           </p>
         </details>
 
         <details class="tech">
-          <summary>Reading team numbers off bumpers</summary>
+          <summary>Reading team numbers off bumpers (tried, abandoned)</summary>
           <p>
-            Tracking gives continuous identities, but not which team a track
-            belongs to. OCR on bumper numbers supplies that, which is hard at
-            competition distance. Motion blur, angle, and partial occlusion all
-            work against it.
+            Tracking gives continuous paths, but not which team a path belongs
+            to. The first answer was OCR on bumper numbers, with reads voted on
+            across a whole track and matched against the six teams the schedule
+            says are on the field. The closed answer set made it look tractable.
           </p>
           <p>
-            What makes it tractable is that the answer set is closed. There are
-            exactly six teams on the field and the match schedule says which.
-            Rather than trusting any single frame, reads are accumulated across
-            the track and voted on over time, and the assignment is made against
-            those six known candidates.
+            It wasn't. On broadcast frames the bumper text is a handful of
+            pixels tall, and no amount of voting recovers digits that were never
+            resolved. Identity is now one tap per robot by the scout, helped by
+            robot photos and path suggestions, and OCR is gone from the system.
           </p>
         </details>
       </div>
+    </section>
+
+    <section class="wrap section narrow" aria-labelledby="pivot">
+      <h2 class="h-lg sec-title" id="pivot">The pivot: why broadcast video lost</h2>
+
+      <p>
+        For most of the project the vision pipeline ran on the server, against
+        event broadcasts. It would download the stream, calibrate automatically
+        from the field's AprilTags, track every robot, and read bumper numbers.
+        On September 25 it ran end to end in production for the first time.
+      </p>
+
+      <p>
+        Then I checked the output by eye. On the best Championship feed, 6 of
+        the 15 tracks it had identified mixed up two robots from the same
+        alliance. Each robot was also only covered for a fraction of the
+        match. Every 2026 broadcast is split-screen, so robots are small and
+        bumper text is smaller still. Nothing downstream could fix that. The
+        information wasn't in the pixels.
+      </p>
+
+      <p>
+        So on September 28 I retired it: stream extraction, server-side
+        tracking, bumper OCR, broadcast calibration, and the worker container
+        that ran them. Vision moved onto the scout's phone, filmed from the
+        stands where robots are bigger and a person can say which is which.
+        The server image went from about 11 GB to 1.65 GB.
+      </p>
+
+      <p>
+        It was the right call and an uncomfortable one. That pipeline was months
+        of work, and it did run. It just didn't produce data I'd let a strategy
+        team act on.
+      </p>
     </section>
 
     <section class="wrap section" aria-labelledby="model">
@@ -241,13 +292,10 @@ const visionStages = [
       <p class="narrow">
         General-purpose detectors barely register competition robots. They aren't
         in the training distribution of a model trained on everyday objects.
-        The detector here is single-class, trained on{" "}
-        {detector.trainImages.toLocaleString()} labeled frames of match footage
-        with a reviewed subset of {detector.reviewedImages.toLocaleString()} images.
-      </p>
-
-      <p class="narrow">
-        The number worth paying attention to is the second one.
+        The detector here is single-class, trained on match footage. The early
+        versions learned from{" "}
+        {detector.trainImages.toLocaleString()} labeled frames with a reviewed
+        subset of {detector.reviewedImages.toLocaleString()} images.
       </p>
 
       <div class="detection-plates reveal" aria-label="Examples from the reviewed Roboflow dataset">
@@ -287,145 +335,285 @@ const visionStages = [
 
       <div class="narrow">
         <p>
-          The v1 run scored {(detector.v1.map50 * 100).toFixed(1)}% mAP@50 on its
-          validation split, which sounds finished and isn't. That split is drawn
-          from the same events, the same venues, and often the same matches as
-          the training data. It measures whether the model learned the frames it
+          The v1 run scored {pct(detector.v1.map50)} mAP@50 on its validation
+          split, which sounds finished and isn't. That split is drawn from the
+          same events, the same venues, and often the same matches as the
+          training data. It measures whether the model learned the frames it
           was shown. It says very little about a competition it has never seen.
+        </p>
+
+        <p>
+          So one full event, {detector.holdoutEvent}, was held out entirely and
+          locked as a benchmark. Against that, the same model scored
+          {" "}{pct(detector.v1HoldoutMap50)}. That drop is the real
+          measurement, and it's the one that governs whether a new model ships.
+          v2 was promoted because it reached {pct(detector.v2.map50)} on that
+          locked holdout, not because its loss curves looked better.
         </p>
       </div>
 
       <RecallGrid />
 
       <div class="narrow">
+        <p>
+          Before reading why recall stalled, try the job the labels were meant
+          to do. These are real frames from the training data.
+        </p>
+      </div>
+
+      <SpotTheRobots />
+
+      <div class="narrow">
+        <h3 class="h-md sub-title" id="v4">Detector v4: the labels were the bug</h3>
 
         <p>
-          So one full event, {detector.holdoutEvent}, was held out entirely and
-          locked as a benchmark. Against that, the same model scored
-          {" "}{(detector.v1HoldoutMap50 * 100).toFixed(1)}%. That drop is the real
-          measurement, and it's the one that governs whether a new model ships.
-          v2 was promoted because it reached
-          {" "}{(detector.v2.map50 * 100).toFixed(1)}% on that locked holdout, not
-          because its loss curves looked better.
+          After v2, recall wouldn't move. Dropping the confidence threshold to
+          almost nothing still left it around half, which is what you'd expect
+          if the model believed some robots were background. It did, because
+          that's what it had been taught.
+        </p>
+
+        <p>
+          An audit of the training labels found they boxed about{" "}
+          {v4.oldBoxesPerFrame} robots per frame, when a typical frame actually
+          holds about {v4.robotsPerFrame}. Every robot left unboxed was a
+          lesson that robots look like background. More training on those
+          labels would only have taught it more firmly.
+        </p>
+
+        <p>
+          The fix was to train only on frames whose labels were already
+          near-complete: {v4.train} for training and {v4.val} for validation,
+          plus {v4.addedByEye} missing robots I confirmed by eye. Model
+          proposals were never auto-accepted, because at high confidence only
+          about 40% of them were real robots. Four training runs on one rented
+          A100 took {v4.gpuHours} and cost {v4.cost}, and the instance shut
+          itself down when they finished.
+        </p>
+
+        <p>
+          On the same locked holdout, with both models re-measured at full
+          1280-pixel resolution (which is why v2 reads slightly differently
+          here than above), mAP@50 went from
+          {" "}{pct(detector.v2Rescored.map50)} to {pct(detector.v4.map50)} and
+          recall from {Math.round(detector.v2Rescored.recall * 100)}% to
+          {" "}{Math.round(detector.v4.recall * 100)}%. On real stands footage it
+          now finds 3.95 robots per frame, against 2.8 to 3.2 before.
         </p>
 
         <details class="tech">
-          <summary>Precision {(detector.v2.precision * 100).toFixed(0)}%, recall {(detector.v2.recall * 100).toFixed(0)}%, and why that tradeoff is the right one</summary>
+          <summary>Precision {Math.round(detector.v4.precision * 100)}%, recall {Math.round(detector.v4.recall * 100)}%, and why that tradeoff is still the right one</summary>
           <p>
-            On the holdout, v2 is precise and comparatively conservative: when it
-            calls something a robot it's almost always right, but it misses
-            detections it isn't sure about. For this system that's the correct
-            direction to err.
+            On the holdout, v4 is precise and still somewhat conservative: when
+            it calls something a robot it's almost always right, and it misses
+            about a third of the ones it isn't sure about. For this system
+            that's the correct direction to err.
           </p>
           <p>
-            A missed detection is a gap ByteTrack can bridge and a human reviewer
-            can see. A false detection is a phantom robot with a trajectory, a
-            zone history, and cycles attributed to it. That noise propagates
-            into the ratings and looks exactly like real data. Recall is the
-            number I'd most like to improve, but not by trading precision for it.
+            A missed detection is a gap the tracker can bridge and the scout can
+            see. A false detection is a phantom robot with a path, a zone
+            history, and a heat map attributed to a real team. That noise
+            propagates and looks exactly like real data. Recall went up because
+            the labels got honest, not because precision was traded away for it.
           </p>
         </details>
       </div>
     </section>
 
-    <section class="wrap section" aria-labelledby="arch">
-      <h2 class="h-lg sec-title narrow" id="arch">System architecture</h2>
+    <section class="wrap section" aria-labelledby="phone">
+      <h2 class="h-lg sec-title narrow" id="phone">Running a neural network on a phone</h2>
 
       <p class="narrow">
-        Video analysis is slow and competitions are not. The architecture is
-        shaped around keeping heavy work off the request path and keeping the
-        interface usable on venue wifi, which frequently means no wifi at all.
+        Moving vision onto the phone only works if a full match finishes before
+        the next one starts. The first version took about seven minutes on a
+        CPU. It now takes well under one.
       </p>
 
-      <div class="arch-grid">
-        {
-          project.stack.map((group) => (
-            <div class="arch-block reveal">
-              <p class="mono arch-head">{group.group}</p>
-              <ul role="list">
-                {group.items.map((i) => <li>{i}</li>)}
-              </ul>
-            </div>
-          ))
-        }
-      </div>
-
-      <Figure
-        src="/img/jamal-oracle.jpg"
-        alt="Jamal at a workbench in the robotics lab with a laptop open to a terminal session on the deployment server."
-        label="Plate 01"
-        caption="Bringing up the Oracle Cloud instance that runs the backend. The screen is deliberately obscured here; it was an SSH session into the deployment host."
-        width={1500}
-        height={1042}
+      <EvidenceStrip
+        label="On-device breakdown speed"
+        items={[
+          { value: "33 s", label: "Full match, GPU", detail: "Chrome with WebGPU, full-size v4" },
+          { value: "55 s", label: "Full match, CPU", detail: "WebKit, Safari's engine, v4-nano" },
+          { value: "~7 min", label: "Where it started", detail: "Same match in WebKit before the work below" },
+        ]}
       />
 
       <div class="narrow">
+        <p>Four changes did most of it:</p>
+
+        <ul class="next-list" role="list">
+          <li>
+            <strong>Read only the field.</strong> A stands view is a thin strip,
+            so a square model input was mostly padding. The detector now reads
+            just the calibrated field area, which is about twice as fast and
+            finds more robots because they're bigger in the input.
+          </li>
+          <li>
+            <strong>Use every core.</strong> WebAssembly can run on several
+            threads, but only on a page with stricter browser isolation. The
+            recorder runs on its own isolated page, so the rest of the app can
+            keep embedding match videos.
+          </li>
+          <li>
+            <strong>Decode, don't play.</strong> Frames used to come from
+            playing the video in real time. WebCodecs now decodes them straight
+            from the file, which took an uploaded match from 85 s to 33 s on a
+            GPU.
+          </li>
+          <li>
+            <strong>Pick the engine per device.</strong> WebGPU gets the
+            full-size model. CPU devices get the nano model, which in WebKit
+            takes 82 ms a frame against 243 ms for the full one.
+          </li>
+        </ul>
+
         <p>
-          A FastAPI backend handles the API and owns the schema in PostgreSQL.
-          Anything expensive gets pushed onto Redis-backed workers: video
-          extraction, detection, tracking, ratings recomputation. A request
-          returns immediately and the job reports progress as it runs. The whole
-          thing is containerized so a competition deployment matches development.
+          These are measured on a laptop in Chrome and in WebKit, the engine
+          Safari and every iPhone browser use. A full run on a real phone at a
+          real event is the next test, and I'll say so until it's done.
+        </p>
+
+        <h3 class="h-md sub-title">Who is that robot?</h3>
+
+        <p>
+          Detection says where robots are. The scout says who they are, and the
+          goal is to ask as little as possible. To score that honestly I labelled
+          one match by hand from its 1080p upload: bumper numbers, each robot's
+          look, and elimination within a frame.
         </p>
 
         <p>
-          The frontend is React and TypeScript, built offline-first. Scouts lose
-          connectivity constantly in a venue; submissions queue locally and sync
-          when the network comes back rather than failing. Part of the analysis
-          also runs in the browser through ONNX Runtime Web, so a device can do
-          its own match breakdown with no server at all.
+          Against those labels, conservative stitching cut one match from 126
+          path fragments to 81, with 95.7% of hand labels landing on the right
+          team. Looser rules made fewer fragments and much worse identity, so
+          they didn't ship. Path suggestions then cut the scout's taps from 81
+          to 48. The trade is that about one suggestion in ten is wrong, and the
+          screen says that rather than hiding it.
         </p>
 
         <details class="tech">
-          <summary>Running it somewhere other than my laptop</summary>
+          <summary>The run that said "done" at 89 seconds</summary>
           <p>
-            Getting this deployed taught me as much as building it. The stack
-            runs across an Oracle Cloud container instance for the backend and a
-            second one for the worker, with managed Postgres and Redis, and the
-            frontend hosted separately. Splitting the API and the worker into
-            separate instances isn't optional: without a worker running, every
-            analysis job queues forever and nothing in the video pipeline
-            executes.
+            Under detection load, WebKit silently drops a video's source every
+            couple of minutes. The stall watchdog read that as the end of the
+            match, so a breakdown covering only the first 89 seconds was
+            reported as complete, with 66 paths and no warning.
           </p>
           <p>
-            The failures were all the unglamorous kind. Network rules that had to
-            explicitly permit outbound traffic to the database and Redis hosts.
-            A database URL that needed the right driver prefix because the code
-            uses psycopg3. Model weights that are gitignored, which means they
-            either get baked into the image at build time or downloaded from
-            object storage at startup, and if neither happens the pipeline
-            silently falls back to a generic detector. I ended up writing strict
-            startup validation so a misconfigured deployment fails loudly on boot
-            instead of producing quietly wrong results all weekend.
-          </p>
-        </details>
-
-        <details class="tech">
-          <summary>Keeping the on-device path honest</summary>
-          <p>
-            The offline breakdown has to produce the same answers as the server,
-            which is a real risk when the same logic exists twice. The core math
-            is written without OpenCV or database access. It takes plain per-frame
-            detections and a homography and returns the same track structure
-            the server path produces.
-          </p>
-          <p>
-            That keeps one implementation of the logic that matters and lets the
-            browser mirror it, with the OpenCV-dependent parts kept deliberately
-            separate.
+            The recorder now reopens the file and resumes from the last frame
+            it processed, and if the video keeps failing it says how far it
+            got. A silent partial result is the worst kind, because it looks
+            like a finished one.
           </p>
         </details>
       </div>
     </section>
 
+    <section class="wrap section narrow" aria-labelledby="predictions">
+      <h2 class="h-lg sec-title" id="predictions">Predicting matches honestly</h2>
+
+      <p>
+        FRCMOB predicts who wins each match, and every page that shows a win
+        probability shows the same one. Getting that number right meant first
+        admitting a wrong one.
+      </p>
+
+      <p>
+        The machine-learning model I'd built scored 82% in training. Tested
+        properly, rating each team only from events it had already played, it
+        scored 49.8%. That's a coin flip, and worse than the plain formula's
+        59.2%. The 82% was leakage: the end-of-event ratings it learned from
+        already contained the matches it was predicting.
+      </p>
+
+      <p>
+        The fix was an as-of replay. For each match, the database is rewound
+        to what was known before it, and only that is used to predict it. Run
+        over the 56 newest events of the 2026 season, it gave every candidate
+        the same honest test.
+      </p>
+
+      <div class="ledger-wrap">
+        <table class="ledger">
+          <caption class="mono">2,507 held-out matches · each predicted from earlier results only</caption>
+          <thead>
+            <tr><th scope="col">Predictor</th><th scope="col">Accuracy</th><th scope="col">Brier</th></tr>
+          </thead>
+          <tbody>
+            <tr class="is-shipped"><th scope="row">Fuel rate, shrunk toward last event (shipped)</th><td>74.9%</td><td>0.173</td></tr>
+            <tr><th scope="row">Rating formula, honest inputs</th><td>69.2%</td><td>0.195</td></tr>
+            <tr class="is-leaky"><th scope="row">Rating formula, end-of-event inputs (leaky)</th><td>81.5%</td><td>0.141</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        The shipped predictor is simple. Each team's official fuel rate from
+        its earlier matches at the event is shrunk toward its rate at its
+        previous event, harder when it has played fewer matches. The alliance
+        sums are compared and turned into a probability with one scale factor,
+        fitted on over 15,000 matches from older events. Teams with no fuel
+        history fall back to the rating formula.
+      </p>
+
+      <p>
+        The lesson is the last row of that table. Fed inputs computed after
+        the matches, even the simple formula looked like 81.5%, and on the first
+        round of each event, before any result existed, it scored 82%. With
+        those inputs removed, that same round fell to a coin flip. Every
+        evaluation now cuts post-match data off first, and the ML stays switched
+        off in production until it beats the formula on the same honest test.
+      </p>
+    </section>
+
     <section class="wrap section" aria-labelledby="product">
-      <h2 class="h-lg sec-title narrow" id="product">The product in use</h2>
+      <h2 class="h-lg sec-title narrow" id="product">Built for real teams</h2>
 
       <p class="narrow">
-        The public frontend is still useful with its cloud services paused. That
-        makes the offline-first claim visible rather than architectural: the
-        scouting workspace loads, announces the connection state, and keeps the
-        local workflow available.
+        The vision work gets the attention, but most of what a team touches at
+        an event is everything around it. Venue wifi fails, scouts swap phones,
+        and a lead needs to know who is watching which robot.
+      </p>
+
+      <div class="arch-grid">
+        <div class="arch-block reveal">
+          <p class="mono arch-head">Team workspaces</p>
+          <ul role="list">
+            <li>Join with a 10-character code, stored only as a hash</li>
+            <li>Picklists, pit notes and rooms stay private to the team</li>
+            <li>Removing a member takes effect on every request</li>
+          </ul>
+        </div>
+        <div class="arch-block reveal">
+          <p class="mono arch-head">Team scouting rooms</p>
+          <ul role="list">
+            <li>One room per team per event</li>
+            <li>The lead assigns scouts to robots, match by match, saved atomically</li>
+            <li>Live sync over WebSockets and Redis, about 0.8 s phone to phone</li>
+          </ul>
+        </div>
+        <div class="arch-block reveal">
+          <p class="mono arch-head">Offline at events</p>
+          <ul role="list">
+            <li>"Ready for no signal": schedules, ratings, predictions and team pages saved ahead</li>
+            <li>Edits queue offline and replay in order</li>
+            <li>"Synced with your team" confirms delivery</li>
+          </ul>
+        </div>
+        <div class="arch-block reveal">
+          <p class="mono arch-head">The rest</p>
+          <ul role="list">
+            <li>Match alerts, Match Center with live scores</li>
+            <li>Picklists with a live alliance-selection mode</li>
+            <li>Pit scouting, strategy briefings, Alliance Advisor</li>
+          </ul>
+        </div>
+      </div>
+
+      <p class="narrow">
+        There are also native iOS and Android apps, built with Capacitor, that
+        keep their sign-in tokens in the Keychain and Keystore. They're built
+        and tested, not in the stores yet.
       </p>
 
       <div class="product-plates">
@@ -439,9 +627,9 @@ const visionStages = [
           />
           <figcaption>
             <span class="mono">Live scouting · offline state</span>
-            The capture shows the full tap-first scouting surface while the
-            backend is paused. The interface keeps the match form available and
-            makes local persistence explicit instead of failing silently.
+            The full tap-first scouting surface with no connection. The match
+            form stays available and the banner makes local saving explicit
+            instead of failing silently.
           </figcaption>
         </figure>
 
@@ -463,6 +651,154 @@ const visionStages = [
       </div>
     </section>
 
+    <section class="wrap section" aria-labelledby="arch">
+      <h2 class="h-lg sec-title narrow" id="arch">System architecture</h2>
+
+      <p class="narrow">
+        Once the video work moved onto phones, the server stopped needing to be
+        big. It needs to be close to its database, fast on venue connections,
+        and cheap enough to leave running all season.
+      </p>
+
+      <div class="arch-grid">
+        {
+          project.stack.map((group) => (
+            <div class="arch-block reveal">
+              <p class="mono arch-head">{group.group}</p>
+              <ul role="list">
+                {group.items.map((i) => <li>{i}</li>)}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+
+      <Figure
+        src="/img/jamal-oracle.jpg"
+        alt="Jamal at a workbench in the robotics lab with a laptop open to a terminal session on the deployment server."
+        label="Plate 01"
+        caption="Working on the Oracle Cloud deployment that runs the backend. The screen is deliberately obscured here; it was an SSH session into the deployment host."
+        width={1500}
+        height={1042}
+      />
+
+      <div class="narrow">
+        <p>
+          The whole backend runs on one free Oracle Cloud VM, with 4 cores and
+          24 GB of memory, for $0 a month. On it are the FastAPI app, Postgres 17,
+          Redis 7, and Caddy for HTTPS. There's no separate worker any more. The
+          React and TypeScript frontend is on Vercel with edge caching in front of
+          the API, and an hourly off-site backup goes to Neon.
+        </p>
+
+        <p>
+          The frontend is built offline-first. Scouts lose connectivity
+          constantly in a venue, so submissions queue locally and sync when the
+          network comes back rather than failing.
+        </p>
+
+        <details class="tech">
+          <summary>Keeping the on-device path honest</summary>
+          <p>
+            The phone's breakdown has to agree with what the server does with
+            it afterwards, which is a real risk when similar logic exists in two
+            languages. The tracking and stitching code is benchmarked against a
+            hand-labelled match, so a change that makes paths look tidier but
+            puts robots on the wrong team fails a number rather than slipping
+            through.
+          </p>
+        </details>
+      </div>
+    </section>
+
+    <section class="wrap section narrow" aria-labelledby="prod">
+      <h2 class="h-lg sec-title" id="prod">Running it in production</h2>
+
+      <p>
+        The backend had been off since April. On September 24 I brought it back
+        on the free VM, and most of what followed was learning what only breaks
+        for real.
+      </p>
+
+      <p>
+        <strong>Distance was the slow part.</strong> The database and Redis were
+        managed services in another region, so every query paid a long round
+        trip. Moving both onto the VM took a schedule request from 911 ms to 18 ms
+        and event ratings from 784 ms to 36 ms.
+      </p>
+
+      <details class="tech">
+        <summary>The backup that broke the app</summary>
+        <p>
+          A database backup taken through Neon's connection pooler changed a
+          session setting, and the pooler handed that broken setting to the
+          app's own connections. The app couldn't find its tables until it was
+          fixed. The backup script now refuses to run against the pooler at all.
+        </p>
+      </details>
+
+      <details class="tech">
+        <summary>Room bugs that only real two-phone tests found</summary>
+        <p>
+          Production runs two server processes; my laptop ran one. Joining a
+          room and opening its live connection could land on different
+          processes, and when they did, the connection was refused as a
+          duplicate scout. The fix clears a scout's presence in Redis, which
+          both processes share, and a new test runs two hubs against one
+          shared store to prove it.
+        </p>
+        <p>
+          The same tests found a second one: reopening a room from another
+          device within 30 seconds was rejected as a duplicate, 12 times out of
+          12. The check behind it predated team workspaces, when scouts picked
+          their own names. Since workspaces, it could only ever match the same
+          person, so it was removed.
+        </p>
+      </details>
+
+      <details class="tech">
+        <summary>Speed work</summary>
+        <ul class="tight-list">
+          <li>Home went from 31 requests to 9.</li>
+          <li>Edge caching turned a 0.81 s miss into a 0.18 s hit.</li>
+          <li>One slow endpoint went from 2.9 s to 10 ms.</li>
+          <li>Real-user speed timings are now collected, so the next round starts from data.</li>
+        </ul>
+      </details>
+
+      <details class="tech">
+        <summary>Cleanup from production logs</summary>
+        <p>
+          One scheduled job re-downloaded the same data every 3 hours and
+          rewrote the same 1,662 rows. Another rebuilt pages for finished events
+          every 2 minutes, for 60 to 100 seconds a run, which kept about half a
+          server process busy for data that couldn't change. The first is gone;
+          the second now only rebuilds events that are in play.
+        </p>
+        <p>
+          A full re-ingest of the 2026 season finished 299 of 299 events with
+          no failures, unattended.
+        </p>
+      </details>
+    </section>
+
+    <section class="wrap section narrow" aria-labelledby="quality">
+      <h2 class="h-lg sec-title" id="quality">Quality checks that run themselves</h2>
+
+      <p>
+        Eight browser guards sweep the app and fail on colours outside the
+        palette, off-scale type sizes, weak contrast, overflow, missing
+        affordances, and pages in one section that don't look like each other.
+      </p>
+
+      <p>
+        The consistency guard only ran at desktop width, so drift that showed up
+        only on phones passed it. I extended it to phone width and checked that
+        it fails on the old code before trusting it on the new. Under the guards
+        sit about 1,400 automated tests across the backend and frontend.
+      </p>
+    </section>
+
     <section class="wrap section" aria-labelledby="review">
       <h2 class="h-lg sec-title narrow" id="review">Review, not trust</h2>
 
@@ -475,18 +811,16 @@ const visionStages = [
 
       <p class="narrow">
         A scout approves the draft, overrides specific fields, or rejects it with
-        a reason. Those decisions are kept, and that turns out to be the most
-        useful data in the system: override rates per field show where the
-        confidence estimates are wrong. If a field is marked high-confidence and
-        humans keep correcting it, the confidence formula for that field is
-        miscalibrated and gets lowered. If a field is never touched, its
-        threshold can go up.
+        a reason, and those decisions are kept. The plan is to use override
+        rates per field to check the confidence estimates: a field marked
+        high-confidence that humans keep correcting is miscalibrated, and a field
+        nobody touches can have its threshold raised.
       </p>
 
       <p class="narrow">
-        That loop is what makes automation safe to add here. The system's estimate
-        of its own reliability gets measured against what reviewers actually do
-        instead of being assumed.
+        That calibration hasn't run yet. There aren't enough reviewed drafts to
+        tune anything on evidence, so for now the thresholds are judgment, and
+        I'd rather say that than imply a loop that hasn't closed.
       </p>
     </section>
 
@@ -503,9 +837,9 @@ const visionStages = [
             derived from how many matches back them.
           </p>
           <p>
-            Teams with little video data are anchored with an external prior
-            (Statbotics EPA) that's blended out as real match data accumulates,
-            so early-event ratings aren't wild guesses dressed up as measurements.
+            Teams with little match data are anchored with an external prior
+            that's blended out as real data accumulates, so early-event ratings
+            aren't wild guesses dressed up as measurements.
           </p>
         </details>
 
@@ -513,15 +847,17 @@ const visionStages = [
           <summary>Shipping a model without breaking the one in use</summary>
           <p>
             Model changes are deployed in shadow first: the candidate runs
-            alongside the model in production, its predictions are logged, and
-            nothing it says reaches a user. After enough coverage the two are
-            compared on the same inputs, and promotion is a decision made on that
-            comparison.
+            alongside what's in production, its predictions are logged, and
+            nothing it says reaches a user. Promotion is a decision made on a
+            fixed comparison, not on a feeling.
           </p>
           <p>
-            This is why the locked holdout exists. Without a benchmark fixed in
-            advance, "the new model seems better" is an easy thing to believe and
-            hard to check.
+            That process did its job. The match-outcome model is switched off
+            in production because it lost an honest test to a simpler formula,
+            as described in{" "}
+            <a href="#predictions">predicting matches honestly</a>. Without a
+            benchmark fixed in advance, "the new model seems better" is an easy
+            thing to believe and hard to check.
           </p>
         </details>
 
@@ -532,18 +868,19 @@ const visionStages = [
             different roles. Season-specific rules are isolated into their own
             configuration and game-context layer instead of being spread through
             the analysis code, so a new season is a configuration change plus
-            retraining rather than a rewrite.
+            retraining rather than a rewrite. The system refuses to run on a
+            season it doesn't know rather than guessing.
           </p>
         </details>
 
         <details class="tech">
           <summary>Degraded runs that announce themselves</summary>
           <p>
-            Pipelines fail quietly by default: a missing model file, a bad
-            calibration, or a video that wouldn't extract still produces output,
-            just wrong output. Runs carry quality signals, and a run that fell
-            back to a generic detector or produced too few findings is flagged
-            rather than reported as ordinary.
+            Pipelines fail quietly by default: a bad calibration, a video that
+            stopped halfway, or a model that didn't load still produces output,
+            just wrong output. Runs carry quality signals, and a run that is
+            partial or produced too few findings says so rather than being
+            reported as ordinary.
           </p>
         </details>
       </div>
@@ -554,36 +891,39 @@ const visionStages = [
 
       <div class="narrow">
         <p>
-          The platform is in active development and has been through several
-          detector generations and a full season of use shaping what it does.
-          The parts I'd call solid are the tracking pipeline, the calibration
-          workflow with its manual fallback, the review loop, and the promotion
-          process for new models.
+          The backend has been live since September. Recall is up, and the
+          on-device breakdown is now the main path, not a fallback. The parts
+          I'd call solid are the honest evaluation setup for both the detector
+          and the predictor, team rooms and offline sync, and the production
+          deployment.
         </p>
 
         <p>The open work, in the order I care about it:</p>
 
         <ul class="next-list" role="list">
           <li>
-            <strong>Recall on held-out events.</strong> {(detector.v2.recall * 100).toFixed(0)}%
-            is the weakest number in the system. More labeled footage from venues
-            and camera angles outside the current training set is the obvious
-            lever.
+            <strong>A full match on a real phone at a real event.</strong> So
+            far the on-device numbers come from desktop browsers and emulated
+            phones.
           </li>
           <li>
-            <strong>Calibration without taps.</strong> The corner-tap fallback
-            works but puts a manual step in front of every clip. Resolving the
-            field geometry from the video itself would remove it.
+            <strong>Native apps in the stores.</strong> Signing, push
+            notifications, and App Store and Play Store setup.
           </li>
           <li>
-            <strong>On-device parity.</strong> The browser path handles a useful
-            subset of what the server does. Closing that gap makes the offline
-            mode a genuine alternative rather than a fallback.
+            <strong>Optional sign-in by email code.</strong> Designed and built,
+            switched off until there's a domain to send from.
           </li>
           <li>
-            <strong>Confidence calibration at scale.</strong> The override-rate
-            loop works but needs more reviewed drafts before per-field thresholds
-            can be tuned on evidence instead of judgment.
+            <strong>2027 season readiness.</strong> The system already refuses
+            to run on unknown seasons. A new game needs its rules, its scoring,
+            and a detector retrain.
+          </li>
+          <li>
+            <strong>ML that earns its place.</strong> A model using only
+            pre-match features reached 72.6% in testing, but it isn't switched
+            on. It goes live when it beats the shipped formula on the same
+            honest replay, not before.
           </li>
         </ul>
       </div>
@@ -768,6 +1108,10 @@ const visionStages = [
     font-size: 0.96rem;
   }
 
+  .next-list + p {
+    margin-top: 1.5rem;
+  }
+
   .next-list strong {
     color: var(--ink);
     font-weight: 560;
@@ -797,5 +1141,76 @@ const visionStages = [
     .detection-plates {
       grid-template-columns: 1fr;
     }
+  }
+
+  .ledger-wrap {
+    margin: 1.75rem 0 2rem;
+    overflow-x: auto;
+  }
+
+  .ledger {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+
+  .ledger caption {
+    text-align: left;
+    padding-bottom: 0.7rem;
+    color: var(--ink-3);
+  }
+
+  .ledger th,
+  .ledger td {
+    padding: 0.6rem 0.5rem;
+    border-top: 1px solid var(--rule);
+    text-align: left;
+    font-weight: 400;
+    color: var(--ink-2);
+  }
+
+  .ledger thead th {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border-top: 0;
+  }
+
+  .ledger td {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .ledger thead th:not(:first-child) {
+    text-align: right;
+  }
+
+  .ledger .is-shipped th,
+  .ledger .is-shipped td {
+    color: var(--ink);
+    font-weight: 560;
+  }
+
+  .ledger .is-shipped td:nth-child(2) {
+    color: var(--accent);
+  }
+
+  .ledger .is-leaky th,
+  .ledger .is-leaky td {
+    color: var(--ink-3);
+  }
+
+  .ledger .is-leaky td:nth-child(2) {
+    color: var(--flag);
+  }
+
+  .tight-list {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: grid;
+    gap: 0.35rem;
   }
 </style>

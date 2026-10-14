@@ -2,8 +2,8 @@
 /**
  * What the recall number costs, drawn as robots.
  *
- * The bar chart next to this says 95.5% and 58.6%. Those read as similar
- * numbers. Drawn as a hundred robots they are not: one chart is a rounding
+ * The bar chart next to this says 95.5%, 58.6% and 67.8%. Those read as
+ * similar numbers. Drawn as a hundred robots they are not: one chart is a rounding
  * error, the other is four robots in ten missing from the match record.
  *
  * Every figure here comes from data/model.ts, which comes from the project's
@@ -32,23 +32,37 @@ function missedSet(recall: number) {
 const views = [
   {
     id: "val",
-    label: "Validation split",
+    chip: "Validation",
+    label: "v1 · validation split",
     sub: "Frames from the same pool it trained on",
-    recall: detector.v1.precision && detector.v1.recall,
+    recall: detector.v1.recall,
     precision: detector.v1.precision,
-    missed: missedSet(detector.v1.recall),
-    found: Math.round(detector.v1.recall * CELLS),
+    mean: "On data that looks like training data, a miss is a rounding error. This is the number that makes a model look finished.",
   },
   {
     id: "holdout",
-    label: `Held-out event · ${detector.holdoutEvent}`,
+    chip: "v2 · held out",
+    label: `v2 · held-out event · ${detector.holdoutEvent}`,
     sub: "An event the model had never seen",
     recall: detector.v2.recall,
     precision: detector.v2.precision,
-    missed: missedSet(detector.v2.recall),
-    found: Math.round(detector.v2.recall * CELLS),
+    mean: "On an event it has never seen, four robots in ten never make it into the match record. A missed robot is an uncounted cycle, and a strategy call made on a number that is quietly wrong.",
   },
-];
+  {
+    id: "v4",
+    chip: "v4 · held out",
+    label: `v4 · same held-out event`,
+    sub: "Retrained on frames whose labels were complete",
+    recall: detector.v4.recall,
+    precision: detector.v4.precision,
+    mean: "Same unseen event, about one robot in three still missed. Better, and still the number I most want to move. The fix wasn't a bigger model; it was the training labels.",
+  },
+].map((v) => ({
+  ...v,
+  missed: missedSet(v.recall),
+  found: Math.round(v.recall * CELLS),
+}));
+
 ---
 
 <figure class="rg" data-recall-grid>
@@ -56,8 +70,8 @@ const views = [
     <div>
       <p class="mono">Fig. 04 · One hundred robots</p>
       <p class="rg-sub">
-        Same detector, two datasets. Each square is a robot that was actually on
-        the field.
+        Three evaluations. Each square is a robot that was actually on the
+        field.
       </p>
     </div>
     <div class="seg" role="group" aria-label="Choose an evaluation set">
@@ -68,7 +82,7 @@ const views = [
           data-view={v.id}
           aria-pressed={i === 0 ? "true" : "false"}
         >
-          {i === 0 ? "Validation" : "Held-out event"}
+          {v.chip}
         </button>
       ))}
     </div>
@@ -103,7 +117,7 @@ const views = [
           <dl class="rg-stats">
             <div>
               <dt class="mono">Recall</dt>
-              <dd>{pct(vi === 0 ? detector.v1.recall : detector.v2.recall)}</dd>
+              <dd>{pct(v.recall)}</dd>
             </div>
             <div>
               <dt class="mono">Precision</dt>
@@ -111,21 +125,18 @@ const views = [
             </div>
           </dl>
 
-          <p class="rg-mean">
-            {vi === 0
-              ? "On data that looks like training data, a miss is a rounding error. This is the number that makes a model look finished."
-              : "On an event it has never seen, four robots in ten never make it into the match record. A missed robot is an uncounted cycle, and a strategy call made on a number that is quietly wrong."}
-          </p>
+          <p class="rg-mean">{v.mean}</p>
         </div>
       </div>
     ))}
   </div>
 
   <figcaption>
-    Both figures are the detector's own evaluation output: v1 on its validation
-    split, v2 on {detector.holdoutImages} frames from {detector.holdoutEvent} that
-    were held out of training. Precision stays high in both, which matters — what
-    it does report is usually real. Recall is what falls over, and recall is what
+    Every figure is the detector's own evaluation output: v1 on its validation
+    split, v2 and v4 on the same {detector.holdoutImages} frames from{" "}
+    {detector.holdoutEvent} that were held out of training, each at its own
+    shipped cutoff. Precision stays high throughout, which matters — what it
+    does report is usually real. Recall is what falls over, and recall is what
     a scouting record depends on.
   </figcaption>
 </figure>
@@ -149,7 +160,7 @@ const views = [
 
   .rg-sub { margin: 0.25rem 0 0; font-size: 0.84rem; color: var(--ink-3); max-width: 46ch; }
 
-  .seg { display: flex; gap: 0.3rem; }
+  .seg { display: flex; flex-wrap: wrap; gap: 0.3rem; }
 
   .chip {
     font-family: var(--mono);

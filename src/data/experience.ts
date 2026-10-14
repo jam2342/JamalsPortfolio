@@ -52,7 +52,7 @@ export const roles: Role[] = [
     points: [
       "Fabrication work on the competition robot, building and assembling parts through the build season.",
       "Pit crew during events: battery swaps, between-match turnaround, and keeping the robot ready to play.",
-      "Built and deployed FRCMOB, a full-stack scouting and match-analysis platform Team 5417 has used at a real competition.",
+      "Built and deployed FRCMOB, a full-stack scouting and match-analysis platform Team 5417 has used at a real competition. Its match predictor called 74.9% of 2,507 held-out matches, and its robot detector reaches 77.9% mAP@50 on an unseen event.",
     ],
     teamCredits: [
       "Member of the team that won the 2025 FIRST Impact Award at the Fort Worth District Event",
@@ -138,7 +138,7 @@ export const skillGroups = [
     group: "Machine learning and computer vision",
     items: [
       "YOLO",
-      "ByteTrack",
+      "Multi-object tracking",
       "ONNX Runtime Web",
       "OpenCV",
       "OCR",

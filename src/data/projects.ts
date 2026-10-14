@@ -42,9 +42,9 @@ export const projects: Project[] = [
     title: "FRCMOB",
     kind: "Scouting and match-analysis platform",
     summary:
-      "Turns FIRST Robotics match video into reviewable strategic evidence, using detection, tracking, and field-coordinate mapping.",
+      "A full scouting platform for FIRST Robotics teams: team workspaces and live rooms, offline event packs, honestly tested match predictions, and a match breakdown that runs on the scout's phone.",
     blurb:
-      "Built and deployed for FRC Team 5417, this full-stack, open-source platform supports multi-scout data collection, offline submissions, strategy analysis, and a computer-vision pipeline for extracting robot activity from match footage. I began it in February 2026 and continue to improve its auto-scouting, mobile reliability, model evaluation, and strategy tools.",
+      "Built and deployed for FRC Team 5417, this full-stack, open-source platform supports team workspaces, live multi-scout rooms, offline event packs, match predictions, and a computer-vision breakdown that runs in the browser on the scout's phone. I began it in February 2026 and keep working on on-device analysis, native apps, and readiness for the 2027 season.",
     years: "February 2026–present",
     tags: ["Machine learning", "Computer vision", "Full-stack", "Robotics"],
     meta: [
@@ -54,11 +54,11 @@ export const projects: Project[] = [
       { label: "Repository", value: "Open source · AGPL-3.0" },
     ],
     stack: [
-      { group: "Backend", items: ["Python", "FastAPI", "PostgreSQL", "Redis", "RQ workers", "Docker"] },
-      { group: "Vision", items: ["YOLO", "ByteTrack", "OpenCV", "Bumper OCR", "AprilTag homography", "Optical flow"] },
-      { group: "Frontend", items: ["React", "TypeScript", "Vite", "ONNX Runtime Web", "Offline-first PWA"] },
-      { group: "Modeling", items: ["Feature engineering", "Role classification", "Alliance synergy", "Shadow deployment", "Calibration"] },
-      { group: "Infrastructure", items: ["Oracle Cloud container instances", "Managed Postgres", "Managed Redis", "Containerized deploys", "Startup validation"] },
+      { group: "Backend", items: ["Python", "FastAPI", "PostgreSQL", "Redis", "WebSockets with Redis pub/sub", "Docker"] },
+      { group: "Vision", items: ["In-browser detector (ONNX Runtime Web: WebGPU/WASM)", "WebCodecs decoding", "4-tap homography", "Field-space tracking", "Path stitching"] },
+      { group: "Frontend", items: ["React", "TypeScript", "Vite", "Offline-first PWA", "Capacitor iOS and Android shells"] },
+      { group: "Modeling", items: ["As-of replay evaluation", "Fuel-rate win probability", "Alliance synergy", "Shadow deployment", "Feature engineering"] },
+      { group: "Infrastructure", items: ["Single OCI VM", "Caddy HTTPS", "Postgres and Redis on the VM", "Neon backup", "Vercel edge cache"] },
     ],
     href: "/work/frcmob/",
     repoUrl: "https://github.com/jam2342/FRCMOB",

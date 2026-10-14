@@ -2,9 +2,9 @@
 import { detector, pct } from "../data/model";
 
 /**
- * Detector evaluation, drawn as paired bars. Two panels rather than one chart
- * because the two evaluations answer different questions and should not be
- * read as a single trend line.
+ * Detector evaluation, drawn as bars. Separate panels rather than one chart
+ * because v1's number answers a different question from the held-out ones and
+ * should not be read as part of a trend line.
  */
 
 const rows = [
@@ -13,50 +13,53 @@ const rows = [
   { key: "precision", label: "Precision" },
   { key: "recall", label: "Recall" },
 ] as const;
+
+const panels = [
+  {
+    head: "v1 · validation split · 80 epochs, A100",
+    sub: "Frames drawn from the same pool the model trained on.",
+    data: detector.v1,
+    holdout: false,
+  },
+  {
+    head: `v2 · held-out event · ${detector.holdoutEvent}`,
+    sub: "An event the model never saw. The honest number, and the old bar.",
+    data: detector.v2,
+    holdout: true,
+  },
+  {
+    head: `v4 · same held-out event · current`,
+    sub: "Trained only on frames with near-complete labels. Runs on phones.",
+    data: detector.v4,
+    holdout: true,
+  },
+];
 ---
 
 <div class="metrics">
-  <div class="metrics-panel">
-    <p class="mono panel-head">v1 · validation split · 80 epochs, A100</p>
-    <p class="panel-sub">Frames drawn from the same pool the model trained on.</p>
-    {
-      rows.map((r) => (
-        <div class="bar-row">
-          <span class="bar-label mono">{r.label}</span>
-          <div class="bar-track">
-            <div class="bar-fill" style={`--w:${detector.v1[r.key] * 100}%`} />
+  {
+    panels.map((p) => (
+      <div class="metrics-panel">
+        <p class="mono panel-head">{p.head}</p>
+        <p class="panel-sub">{p.sub}</p>
+        {rows.map((r) => (
+          <div class="bar-row">
+            <span class="bar-label mono">{r.label}</span>
+            <div class="bar-track">
+              <div class:list={["bar-fill", { "is-holdout": p.holdout }]} style={`--w:${p.data[r.key] * 100}%`} />
+            </div>
+            <span class="bar-val mono">{pct(p.data[r.key])}</span>
           </div>
-          <span class="bar-val mono">{pct(detector.v1[r.key])}</span>
-        </div>
-      ))
-    }
-  </div>
-
-  <div class="metrics-panel">
-    <p class="mono panel-head">
-      v2 · held-out event · {detector.holdoutEvent}
-    </p>
-    <p class="panel-sub">
-      An event the model never saw during training. This is the honest number.
-    </p>
-    {
-      rows.map((r) => (
-        <div class="bar-row">
-          <span class="bar-label mono">{r.label}</span>
-          <div class="bar-track">
-            <div class="bar-fill is-holdout" style={`--w:${detector.v2[r.key] * 100}%`} />
-          </div>
-          <span class="bar-val mono">{pct(detector.v2[r.key])}</span>
-        </div>
-      ))
-    }
-  </div>
+        ))}
+      </div>
+    ))
+  }
 </div>
 
 <style>
   .metrics {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1px;
     background: var(--rule);
     border: 1px solid var(--rule);
@@ -133,7 +136,7 @@ const rows = [
     }
   }
 
-  @media (max-width: 640px) {
+  @media (max-width: 860px) {
     .metrics {
       grid-template-columns: 1fr;
     }
