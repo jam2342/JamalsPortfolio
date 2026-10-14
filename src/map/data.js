@@ -200,5 +200,84 @@ export function buildGraph() {
   acts.forEach((_, i) => L(i ? "a" + (i - 1) : "crypto", "a" + i));
   for (let i = 0; i < 7; i++) L("pico", "p" + i);
 
-  return { TOPICS, nodes, links, byId, ctf, kits, acts, season };
+  // ----- question-led routes (drafts: Jamal to confirm the wording) -----
+  const ROUTES = [
+    { id: "highlights", title: "The highlights", blurb: "Eleven stops across everything.",
+      stops: ["frcmob", "spot", "frcmob--predictions", "hardening", "crypto", "eaglets", "ee", "notetaker", "avmac", "about", "contact"].map((id) => [id, ""]) },
+    { id: "changed", title: "Where I changed my mind", blurb: "Five times the evidence said I was wrong, and what I did next.",
+      stops: [
+        ["ocr", "The first plan was to read team numbers off bumpers. The digits turned out to be a handful of pixels, so it went."],
+        ["frcmob--pivot", "Then the whole broadcast pipeline. It ran end to end, but it mixed up robots, so I retired months of work."],
+        ["holdout", "98% on the validation split looked finished. On an event the model had never seen, it was 70%."],
+        ["predict", "My ML predictor scored 82% in training and 49.8% without hindsight. A simpler formula shipped instead."],
+        ["linear", "In physics, the data disagreed with my hypothesis, and that's what I reported."],
+      ] },
+    { id: "people", title: "Building for people who aren't me", blurb: "Nine-year-olds, scouts in a loud venue, and engineers deciding whether to ship.",
+      stops: [
+        ["eaglets", "The user here is a nine-year-old with forty minutes and a bag of parts."],
+        ["registers", "The hard design call: hide enough that the robot moves, not so much that nothing is learned."],
+        ["boards", "When the boards broke mid-season, the camps ran anyway."],
+        ["frcmob--product", "For scouts: venue wifi fails, phones get swapped, and the data still has to arrive."],
+        ["spot", "Try the labeling job yourself before reading why it was hard."],
+        ["crypto--decision", "For working engineers, the course ends on a decision, not a quiz."],
+      ] },
+    { id: "stop", title: "When automation should stop and ask", blurb: "The same rule in four projects: the tool reports, a person decides.",
+      stops: [
+        ["simulate", "The hardening framework reports what it would change before it changes anything."],
+        ["review", "FRCMOB's model output stays a draft until a scout approves it."],
+        ["consent", "Notetaker can notice a meeting, but only you can start the recording."],
+        ["avmac--refuse", "av-mac won't click on a screen it can't name."],
+        ["crypto--decision", "In the course: an automated finding is evidence for a decision, not the decision."],
+      ] },
+  ];
+
+  // ----- evidence receipts for headline numbers (drafts: Jamal to confirm) -----
+  const RECEIPTS = [
+    { nodes: ["v4", "frcmob--model"], claim: "77.9%", what: "Detector v4, mAP@50 on the locked holdout",
+      rows: [["Measured", "mAP@50 77.9%, precision 90.5%, recall 67.8% at the shipped 0.35 cutoff"],
+             ["Test set", "224 frames from Einstein 2026, an event never used in training"],
+             ["Compared with", "v2 scored 71.9% on the same frames, re-measured at 1280 px"],
+             ["Trained on", "798 frames with near-complete labels (156 for validation), plus 45 robots confirmed by eye"],
+             ["My part", "Sole developer: label audit, training runs, evaluation"],
+             ["Source", "FRCMOB repository (public, AGPL-3.0). Weights and training data are private"],
+             ["Limits", "One held-out event. It still misses about a third of the robots it isn't sure about"]] },
+    { nodes: ["predict", "frcmob--predictions"], claim: "74.9%", what: "Match outcomes called correctly, without hindsight",
+      rows: [["Measured", "74.9% of 2,507 matches, Brier score 0.173"],
+             ["Test set", "The 56 newest events of the 2026 season"],
+             ["Conditions", "As-of replay: each match predicted only from what was known before it"],
+             ["Compared with", "Rating formula 69.2%. With leaked end-of-event inputs it looked like 81.5%"],
+             ["My part", "Sole developer: replay harness, predictor, evaluation"],
+             ["Source", "FRCMOB repository (public, AGPL-3.0)"],
+             ["Limits", "One season. The ML model reached 72.6% and stays off until it beats this"]] },
+    { nodes: ["pico"], claim: "70 / 70", what: "picoCTF 2026, every challenge, #68 worldwide",
+      rows: [["Result", "All 70 challenges, 14,500 of 14,500 points, #68 worldwide"],
+             ["My part", "60 of the 70 (13,500 points), including all 22 rated 300 points or more"],
+             ["Team", "Two people"],
+             ["Source", "picoCTF 2026 scoreboard (link to add)"]] },
+    { nodes: ["hardening", "hardening--scale"], claim: "~11,900", what: "Lines of PowerShell in the hardening framework",
+      rows: [["Measured", "About 11,900 lines across roughly 170 functions"],
+             ["What it covers", "Hundreds of checks, each in an audit form and a fix form, for three Windows targets"],
+             ["My part", "Sole developer"],
+             ["Source", "Private repository; available to review on request"],
+             ["Limits", "Size reflects coverage, not quality"]] },
+    { nodes: ["ondevice", "frcmob--phone"], claim: "33 s", what: "Full-match breakdown time on device",
+      rows: [["Measured", "33 s on a GPU (Chrome, WebGPU, full v4); 55 s on a CPU (WebKit, v4-nano). It started at about 7 minutes"],
+             ["Conditions", "On a laptop, in Chrome and in WebKit, the engine Safari and every iPhone browser use"],
+             ["My part", "Sole developer"],
+             ["Source", "FRCMOB repository (public, AGPL-3.0)"],
+             ["Limits", "Not yet run on a real phone at a real event"]] },
+    { nodes: ["captures", "avmac--verified"], claim: "79 / 79", what: "av-mac screens classified from real captures",
+      rows: [["Measured", "All 79 recorded captures classified, zero unknown; 200 tests"],
+             ["Conditions", "Recorded captures replayed offline, no game running"],
+             ["Source", "av-mac repository (public, MIT)"],
+             ["Limits", "One machine, one macOS version, one window size. The card handler has never clicked a card live"]] },
+    { nodes: ["tau", "ia"], claim: "\u221221%", what: "Capacitor time constant from 10 \u00b0C to 50 \u00b0C",
+      rows: [["Measured", "\u03c4 = 46.7 \u00b1 0.4 s at 10 \u00b0C and 36.8 \u00b1 0.4 s at 50 \u00b0C"],
+             ["Method", "Five temperatures, a fixed 47 k\u03a9 resistor, log-linear fits with R\u00b2 above 0.9995"],
+             ["Uncertainty", "Extreme gradients still consistent with \u00b10.01 V on every reading"],
+             ["Source", "IB Physics internal assessment, submitted and graded in summer 2026; available on request"],
+             ["Limits", "Only tested from 10 \u00b0C to 50 \u00b0C"]] },
+  ];
+
+  return { TOPICS, nodes, links, byId, ctf, kits, acts, season, ROUTES, RECEIPTS };
 }

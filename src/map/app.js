@@ -10,7 +10,7 @@ import { buildGraph } from "./data.js";
 import CONTENT_JSON from "./content.json";
 import ML_JSON from "./ml.json";
 
-const { nodes, links, byId, ctf } = buildGraph();
+const { nodes, links, byId, ctf, ROUTES, RECEIPTS } = buildGraph();
 
 
   /* =================================================================
@@ -78,16 +78,28 @@ const { nodes, links, byId, ctf } = buildGraph();
   const $ = (id) => document.getElementById(id);
   let W = 0, H = 0, dpr = 1, t = d3.zoomIdentity;
   let hover = null, hoverLink = null, open = null, focusCluster = null, showAuthored = false, ready = false;
+  let check = null;   // node whose projection is being checked
+  let kbd = false;    // the visitor is moving with the keyboard: show direction badges
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const narrow = () => W <= 720;
   const anims = [];
   let raf = 0;
 
+  function screenNN(n, k = 5) {
+    return nodes.filter((m) => m !== n).map((m) => [m, (m.u[0] - n.u[0]) ** 2 + (m.u[1] - n.u[1]) ** 2])
+      .sort((a, b) => a[1] - b[1]).slice(0, k).map(([m]) => m);
+  }
+  function checkSets(n) {
+    const meaning = n.nn.map(([id]) => byId.get(id)).filter(Boolean);
+    const screen = screenNN(n, meaning.length);
+    return { both: meaning.filter((m) => screen.includes(m)), meaningOnly: meaning.filter((m) => !screen.includes(m)), screenOnly: screen.filter((m) => !meaning.includes(m)) };
+  }
   function rgba(hex, a) { const v = parseInt(hex.slice(1), 16); return `rgba(${v >> 16},${(v >> 8) & 255},${v & 255},${a})`; }
   const P = (n) => [n.x * t.k + t.x, n.y * t.k + t.y];
   const rad = (n) => n.r * Math.max(0.7, Math.min(t.k, 2.2));
   function lit(n) {
     const f = open || hover;
+    if (check && f === check) { const c = checkSets(check); return n === f || c.both.includes(n) || c.meaningOnly.includes(n) || c.screenOnly.includes(n); }
     if (f) return n === f || adj.get(f.id).has(n.id);
     if (focusCluster !== null) return n.cluster === focusCluster;
     return true;
@@ -162,6 +174,27 @@ const { nodes, links, byId, ctf } = buildGraph();
       ctx.globalAlpha = 1;
     });
 
+    if (check && open === check) {
+      const c = checkSets(check), [ox, oy] = P(check);
+      const ring = (m, color, dash, w) => { const [x, y] = P(m); ctx.setLineDash(dash); ctx.strokeStyle = color; ctx.lineWidth = w; ctx.beginPath(); ctx.arc(x, y, rad(m) + 7, 0, Math.PI * 2); ctx.stroke(); };
+      c.meaningOnly.forEach((m) => { const [x, y] = P(m); ctx.setLineDash([4, 5]); ctx.strokeStyle = "rgba(90,140,255,0.8)"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(x, y); ctx.stroke(); });
+      c.both.forEach((m) => ring(m, "#e9edf3", [], 2));
+      c.meaningOnly.forEach((m) => ring(m, "#5a8cff", [], 2.5));
+      c.screenOnly.forEach((m) => ring(m, "#f0a35e", [3, 3], 2));
+      ctx.setLineDash([]);
+    }
+    // direction badges for keyboard movement
+    if (kbd && open) {
+      ctx.font = "600 11px 'JetBrains Mono', ui-monospace, Menlo, monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      Object.entries(dirTargets(open)).forEach(([k, m]) => {
+        if (!m) return;
+        const [x, y] = P(m), r = rad(m), glyph = { ArrowUp: "\u2191", ArrowDown: "\u2193", ArrowLeft: "\u2190", ArrowRight: "\u2192" }[k];
+        const bx = x - r - 13, by = y - r - 11;
+        ctx.fillStyle = "#2a62e8"; ctx.fillRect(bx - 9, by - 9, 18, 18);
+        ctx.fillStyle = "#f4f7ff"; ctx.fillText(glyph, bx, by + 0.5);
+      });
+      ctx.textAlign = "start";
+    }
     // labels never overlap and never run off-screen: cluster tags first, then nodes by priority
     const taken = [];
     const free = (a, b, c, d) => !taken.some((r) => a < r[2] && c > r[0] && b < r[3] && d > r[1]);
@@ -261,7 +294,8 @@ const { nodes, links, byId, ctf } = buildGraph();
     fitBox(d3.min(nodes, (n) => n.x) - 30, d3.max(nodes, (n) => n.x) + 30, d3.min(nodes, (n) => n.y) - 40, d3.max(nodes, (n) => n.y) + 20, v, 1.8, ms);
   }
   function frameOn(n) {
-    const pts = [n, ...[...adj.get(n.id)].map((id) => byId.get(id))];
+    let pts = [n, ...[...adj.get(n.id)].map((id) => byId.get(id))];
+    if (check === n) { const c = checkSets(n); pts = [n, ...c.both, ...c.meaningOnly, ...c.screenOnly]; }
     const pad = 24;
     fitBox(d3.min(pts, (p) => p.x) - pad, d3.max(pts, (p) => p.x) + pad, d3.min(pts, (p) => p.y) - pad, d3.max(pts, (p) => p.y) + pad, cardBox(), 2.6, 750);
   }
@@ -347,8 +381,24 @@ const { nodes, links, byId, ctf } = buildGraph();
   }
   const clusterChip = (n) => `<span class="tchip"><span class="swatch" style="background:${n.color}"></span>${esc(CL[n.cluster].name)}</span>`;
   const linkOf = (a, b) => authored.find((l) => (l.source === a && l.target === b) || (l.source === b && l.target === a));
+  function checkHTML(n) {
+    const c = checkSets(n), name = (m) => esc(m.sat ? m.parent.title + " › " + m.title : m.title);
+    const list = (arr, cls) => arr.length ? `<ul class="links compact">${arr.map((m) => `<li><button type="button" data-go="${m.id}" class="${cls}"><span class="swatch" style="background:${m.color}"></span>${name(m)}</button></li>`).join("")}</ul>` : `<p class="none">None</p>`;
+    return `<div class="check" role="region" aria-label="How faithful the map is here">
+      <p class="check-sum"><strong>${c.both.length} of ${n.nn.length}</strong> of its nearest neighbours in meaning are also its nearest dots on screen.</p>
+      <p class="check-h"><span class="k k-both"></span>Close in meaning and on screen</p>${list(c.both, "")}
+      <p class="check-h"><span class="k k-meaning"></span>Close in meaning, but drawn further away</p>${list(c.meaningOnly, "")}
+      <p class="check-h"><span class="k k-screen"></span>Close on screen only</p>${list(c.screenOnly, "")}
+      <p class="check-note">Squeezing 384 dimensions into 2 always loses something. This shows where, for this dot.</p>
+    </div>`;
+  }
+  function receiptsHTML(n) {
+    const rs = RECEIPTS.filter((r) => r.nodes.includes(n.id));
+    if (!rs.length) return "";
+    return `<p class="sec-h">Receipts</p>${rs.map((r) => `<details class="receipt"><summary><span class="r-claim">${esc(r.claim)}</span><span class="r-what">${esc(r.what)}</span><span class="draft">Draft</span></summary><dl>${r.rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl></details>`).join("")}`;
+  }
   function nnHTML(n) {
-    return `<p class="sec-h">Nearest by meaning <button type="button" class="info" data-method aria-label="How similarity is measured">?</button></p><ul class="nn">${n.nn.map(([id, c]) => {
+    return `<p class="sec-h">Nearest by meaning <button type="button" class="info" data-method aria-label="How similarity is measured">?</button><button type="button" class="check-btn" data-check aria-pressed="${check === n}">${check === n ? "Hide check" : "Check the map here"}</button></p>${check === n ? checkHTML(n) : ""}<ul class="nn">${n.nn.map(([id, c]) => {
       const m = byId.get(id); if (!m) return "";
       return `<li><button type="button" data-go="${esc(id)}"><span class="swatch" style="background:${m.color}"></span><span class="nn-t">${esc(m.sat ? m.parent.title + " › " + m.title : m.title)}</span><span class="nn-c">${c.toFixed(2)}</span></button></li>`;
     }).join("")}</ul>`;
@@ -369,7 +419,9 @@ const { nodes, links, byId, ctf } = buildGraph();
       if (n.id === "frcmob--season" && !n.blocks.some((b) => b.t === "widget")) out.push(`<div data-widget="season"></div>`);
       const list = sats.get(n.parent.id), prev = list[n.idx - 1], next = list[n.idx + 1];
       out.push(`<div class="pager">${prev ? `<button type="button" data-go="${prev.id}"><span>Previous</span>${esc(prev.title)}</button>` : ""}${next ? `<button type="button" class="next" data-go="${next.id}"><span>Next</span>${esc(next.title)}</button>` : `<button type="button" class="next" data-go="${n.parent.id}"><span>Back to</span>${esc(n.parent.title)}</button>`}</div>`);
+      out.push(receiptsHTML(n));
       out.push(nnHTML(n));
+      if (kbd) out.push(`<p class="kbd-hint">Arrow keys jump to the nearest dot in that direction.</p>`);
       return out.join("");
     }
     out.push(`<div class="chips">${clusterChip(n)}</div><h2>${esc(n.title)}</h2>${n.when ? `<p class="when">${esc(n.when)}</p>` : ""}`);
@@ -392,8 +444,10 @@ const { nodes, links, byId, ctf } = buildGraph();
     }
     const inside = sats.get(n.id);
     if (inside) out.push(`<p class="sec-h">Inside · ${inside.length} parts, each its own point on the map</p><ul class="inside">${inside.map((s) => `<li><button type="button" data-go="${s.id}"><span class="dot" style="background:${s.color}"></span>${esc(s.title)}</button></li>`).join("")}</ul>`);
+    out.push(receiptsHTML(n));
     out.push(nnHTML(n));
     out.push(authoredHTML(n));
+    if (kbd) out.push(`<p class="kbd-hint">Arrow keys jump to the nearest dot in that direction.</p>`);
     return out.join("");
   }
   function contactHTML() {
@@ -477,6 +531,7 @@ const { nodes, links, byId, ctf } = buildGraph();
     if (typeof n === "string") n = byId.get(n);
     if (!n || !ready) return;
     hideHint();
+    if (check && check !== n) check = null;
     open = n; hover = null; tag.hidden = true;
     $("crumbs").innerHTML = crumbs(n);
     showCard(cardHTML(n), n.color, n.wide);
@@ -516,7 +571,8 @@ const { nodes, links, byId, ctf } = buildGraph();
   }
   card.addEventListener("click", (e) => {
     const goEl = e.target.closest("[data-go]"), nl = e.target.closest("a[data-node]"), home = e.target.closest("[data-home]"), cp = e.target.closest("[data-copy]");
-    const meth = e.target.closest("[data-method]"), clu = e.target.closest("[data-cluster]");
+    const meth = e.target.closest("[data-method]"), clu = e.target.closest("[data-cluster]"), chk = e.target.closest("[data-check]");
+    if (chk && open) { check = check === open ? null : open; const y = scroller.scrollTop; showCard(cardHTML(open), open.color, open.wide); scroller.scrollTop = y; frameOn(open); draw(); return; }
     if (goEl) { e.preventDefault(); openNode(goEl.dataset.go); }
     else if (nl) { e.preventDefault(); const id = resolve(nl.dataset.node); if (id) openNode(id); }
     else if (home) closeAll();
@@ -538,6 +594,24 @@ const { nodes, links, byId, ctf } = buildGraph();
     }
     return byId.has(hub) ? hub : null;
   }
+  function dirTargets(n) {
+    const [ox, oy] = P(n), out = {};
+    const dirs = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] };
+    for (const [k, [dx, dy]] of Object.entries(dirs)) {
+      let best = null, bs = Infinity;
+      nodes.forEach((m) => {
+        if (m === n) return;
+        const [x, y] = P(m), vx = x - ox, vy = y - oy, d = Math.hypot(vx, vy);
+        if (d < 4) return;
+        const cos = (vx * dx + vy * dy) / d;
+        if (cos < Math.cos(Math.PI / 4)) return; // within 45 degrees of the arrow
+        const score = d * (2 - cos);
+        if (score < bs) { bs = score; best = m; }
+      });
+      out[k] = best;
+    }
+    return out;
+  }
   document.addEventListener("keydown", (e) => {
     const typing = /INPUT|TEXTAREA/.test(document.activeElement.tagName);
     if (e.key === "Escape") {
@@ -546,19 +620,34 @@ const { nodes, links, byId, ctf } = buildGraph();
       else if (!card.hidden) closeAll();
     }
     if (e.key === "/" && !typing) { e.preventDefault(); $("q").focus(); }
-    if (!typing && open && (e.key === "ArrowRight" || e.key === "ArrowLeft")) {
-      const dir = e.key === "ArrowRight" ? 1 : -1;
-      if (tour >= 0) { stepTour(dir); return; }
-      if (open.sat) { const l = sats.get(open.parent.id)[open.idx + dir]; if (l) openNode(l); }
-      else if (dir > 0 && sats.has(open.id)) openNode(sats.get(open.id)[0]);
+    const arrow = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key);
+    if (!typing && arrow && $("list").hidden) {
+      if (tour >= 0 && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { stepTour(e.key === "ArrowRight" ? 1 : -1); return; }
+      e.preventDefault();
+      kbd = true;
+      if (!open) {  // start from the dot nearest the middle of the screen
+        let best = null, bd = Infinity;
+        nodes.forEach((m) => { const [x, y] = P(m), d = Math.hypot(x - W / 2, y - H / 2); if (d < bd) { bd = d; best = m; } });
+        if (best) openNode(best, { keepFocus: true });
+        return;
+      }
+      const target = dirTargets(open)[e.key];
+      if (target) openNode(target, { keepFocus: true });
     }
   });
 
   /* =================================================================
      Tour
      ================================================================= */
-  const TOUR = ["frcmob", "spot", "frcmob--predictions", "hardening", "crypto", "eaglets", "ee", "notetaker", "avmac", "about", "contact"];
+  let ROUTE = ROUTES[0];
+  let TOUR = ROUTE.stops.map(([id]) => id);
   let tour = -1;
+  function startRoute(id) {
+    ROUTE = ROUTES.find((r) => r.id === id) || ROUTES[0];
+    TOUR = ROUTE.stops.map(([s]) => s);
+    $("tour-menu").hidden = true; $("tour").setAttribute("aria-expanded", "false");
+    tour = -1; stepTour(1);
+  }
   function stepTour(dir) {
     const next = tour + dir;
     if (next < 0) return;
@@ -569,11 +658,20 @@ const { nodes, links, byId, ctf } = buildGraph();
     const bar = $("tourbar");
     if (tour < 0 || !open || resolve(TOUR[tour]) !== open.id) { if (open && tour >= 0 && resolve(TOUR[tour]) !== open.id) tour = -1; bar.hidden = true; return; }
     bar.hidden = false;
-    $("t-step").textContent = `Tour · ${tour + 1} of ${TOUR.length}`;
+    $("t-step").textContent = `${ROUTE.title} · ${tour + 1} of ${TOUR.length}`;
+    const say = ROUTE.stops[tour][1];
+    $("t-say").textContent = say; $("t-say").hidden = !say;
     $("t-prev").disabled = tour === 0;
     $("t-next").textContent = tour === TOUR.length - 1 ? "Finish" : "Next";
   }
-  $("tour").addEventListener("click", () => { tour = -1; stepTour(1); });
+  $("tour-menu").innerHTML = ROUTES.map((r) => `<button type="button" role="menuitem" data-route="${r.id}"><b>${esc(r.title)}</b><span>${esc(r.blurb)} · ${r.stops.length} stops</span></button>`).join("");
+  $("tour").addEventListener("click", () => {
+    const show = $("tour-menu").hidden;
+    $("tour-menu").hidden = !show; $("tour").setAttribute("aria-expanded", String(show));
+    if (show) $("tour-menu").querySelector("button").focus();
+  });
+  $("tour-menu").addEventListener("click", (e) => { const b = e.target.closest("[data-route]"); if (b) startRoute(b.dataset.route); });
+  document.addEventListener("click", (e) => { if (!e.target.closest("#tour, #tour-menu")) { $("tour-menu").hidden = true; $("tour").setAttribute("aria-expanded", "false"); } });
   $("t-next").addEventListener("click", () => stepTour(1));
   $("t-prev").addEventListener("click", () => stepTour(-1));
   $("t-end").addEventListener("click", () => { tour = -1; $("tourbar").hidden = true; });
