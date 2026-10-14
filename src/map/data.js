@@ -278,7 +278,7 @@ export function buildGraph() {
       rows: [["Measured", "\u03c4 = 46.7 \u00b1 0.4 s at 10 \u00b0C and 36.8 \u00b1 0.4 s at 50 \u00b0C"],
              ["Method", "Five temperatures, a fixed 47 k\u03a9 resistor, log-linear fits with R\u00b2 above 0.9995"],
              ["Uncertainty", "Extreme gradients still consistent with \u00b10.01 V on every reading"],
-             ["Source", "IB Physics internal assessment, submitted and graded in summer 2026; available on request"],
+             ["Source", "IB Physics internal assessment, submitted and graded in summer 2026"],
              ["Limits", "Only tested from 10 \u00b0C to 50 \u00b0C"]] },
   ];
 
