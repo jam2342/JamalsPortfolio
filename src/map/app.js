@@ -10,7 +10,10 @@ import { buildGraph } from "./data.js";
 import CONTENT_JSON from "./content.json";
 import ML_JSON from "./ml.json";
 
-const { nodes, links, byId, ctf, ROUTES, RECEIPTS } = buildGraph();
+const { nodes, links, byId, ctf, ROUTES: ALL_ROUTES, RECEIPTS: ALL_RECEIPTS } = buildGraph();
+// Only wording Jamal has confirmed goes on the live site; drafts stay in data.js.
+const ROUTES = ALL_ROUTES.filter((r) => !r.draft);
+const RECEIPTS = ALL_RECEIPTS.filter((r) => r.verified);
 
 
   /* =================================================================
@@ -395,7 +398,7 @@ const { nodes, links, byId, ctf, ROUTES, RECEIPTS } = buildGraph();
   function receiptsHTML(n) {
     const rs = RECEIPTS.filter((r) => r.nodes.includes(n.id));
     if (!rs.length) return "";
-    return `<p class="sec-h">Receipts</p>${rs.map((r) => `<details class="receipt"><summary><span class="r-claim">${esc(r.claim)}</span><span class="r-what">${esc(r.what)}</span><span class="draft">Draft</span></summary><dl>${r.rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl></details>`).join("")}`;
+    return `<p class="sec-h">Receipts</p>${rs.map((r) => `<details class="receipt"><summary><span class="r-claim">${esc(r.claim)}</span><span class="r-what">${esc(r.what)}</span></summary><dl>${r.rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>${(r.evidence || []).map(([src, alt]) => `<figure class="r-ev"><a href="${esc(src)}" target="_blank" rel="noopener" aria-label="Open full size: ${esc(alt)}"><img src="${esc(src)}" alt="${esc(alt)}" loading="lazy"></a></figure>`).join("")}</details>`).join("")}`;
   }
   function nnHTML(n) {
     return `<p class="sec-h">Nearest by meaning <button type="button" class="info" data-method aria-label="How similarity is measured">?</button><button type="button" class="check-btn" data-check aria-pressed="${check === n}">${check === n ? "Hide check" : "Check the map here"}</button></p>${check === n ? checkHTML(n) : ""}<ul class="nn">${n.nn.map(([id, c]) => {
@@ -665,7 +668,9 @@ const { nodes, links, byId, ctf, ROUTES, RECEIPTS } = buildGraph();
     $("t-next").textContent = tour === TOUR.length - 1 ? "Finish" : "Next";
   }
   $("tour-menu").innerHTML = ROUTES.map((r) => `<button type="button" role="menuitem" data-route="${r.id}"><b>${esc(r.title)}</b><span>${esc(r.blurb)} · ${r.stops.length} stops</span></button>`).join("");
+  if (ROUTES.length === 1) { $("tour").textContent = "Take the tour"; $("tour").removeAttribute("aria-haspopup"); $("tour").removeAttribute("aria-expanded"); }
   $("tour").addEventListener("click", () => {
+    if (ROUTES.length === 1) { startRoute(ROUTES[0].id); return; }
     const show = $("tour-menu").hidden;
     $("tour-menu").hidden = !show; $("tour").setAttribute("aria-expanded", String(show));
     if (show) $("tour-menu").querySelector("button").focus();
