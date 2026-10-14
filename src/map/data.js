@@ -261,7 +261,7 @@ export function buildGraph() {
       rows: [["Measured", "About 11,900 lines across roughly 170 functions"],
              ["What it covers", "Hundreds of checks, each in an audit form and a fix form, for three Windows targets"],
              ["My part", "Sole developer"],
-             ["Source", "Private repository; available to review on request"],
+             ["Source", "Private repository"],
              ["Limits", "Size reflects coverage, not quality"]] },
     { nodes: ["ondevice", "frcmob--phone"], claim: "33 s", what: "Full-match breakdown time on device",
       rows: [["Measured", "33 s on a GPU (Chrome, WebGPU, full v4); 55 s on a CPU (WebKit, v4-nano). It started at about 7 minutes"],
