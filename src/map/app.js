@@ -423,7 +423,8 @@ const { nodes, links, byId, ctf } = buildGraph();
         <li><strong>Solid lines.</strong> Mutual nearest neighbours (k = 5) by cosine similarity in ${m.dims}-D. Hover a line for its score.</li>
         <li><strong>Dashed lines.</strong> Links I drew myself: sections of a project, timelines, and connections I think matter. They aren't used for layout or colour.</li>
         <li><strong>Cluster names.</strong> ${esc(m.naming)}. They are the words that set each cluster apart, not themes I chose.</li>
-        <li><strong>Coordinate tags.</strong> Hover a dot to see its raw UMAP coordinates.</li>
+        <li><strong>Coordinate tags.</strong> Hover a dot to see its UMAP coordinates.</li>
+        <li><strong>Orientation.</strong> UMAP's rotation is arbitrary, so each update is turned to line up with the previous one (rotation and reflection only, which changes no distances). The map doesn't flip when a sentence changes.</li>
       </ul>
       <h3>Checks</h3>
       <dl>

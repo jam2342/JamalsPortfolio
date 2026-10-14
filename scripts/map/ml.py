@@ -141,6 +141,26 @@ for s in (7, 2026):
     o = nn_sets(project(s))
     seed_overlap[str(s)] = round(float(np.mean([len(ld[i] & o[i]) / 10 for i in range(len(docs))])), 3)
 
+# ---------- 5b. keep the map's orientation stable between runs ----------
+# UMAP's rotation and reflection are arbitrary, so a one-word edit can flip the
+# whole picture. Align to the previous layout with an orthogonal Procrustes fit
+# (rotation/reflection only, plus centring): no distance changes, so every
+# check above still holds.
+aligned = None
+try:
+    prev = json.load(open(OUT))["nodes"]
+    common = [i for i, d in enumerate(docs) if d["id"] in prev]
+    if len(common) >= 10:
+        A = np.array([prev[docs[i]["id"]]["u"] for i in common]); B = Y[common]
+        ma, mb = A.mean(0), B.mean(0)
+        U_, _, Vt = np.linalg.svd((B - mb).T @ (A - ma))
+        R = U_ @ Vt
+        Y = (Y - mb) @ R + ma
+        aligned = {"to_previous": True, "shared_nodes": len(common),
+                   "rms_shift": round(float(np.sqrt(((Y[common] - A) ** 2).sum(1).mean())), 3)}
+except FileNotFoundError:
+    pass
+
 # ---------- 6. names: doc-normalised c-TF-IDF, terms in >= 2 member docs ----------
 from sklearn.feature_extraction.text import CountVectorizer, ENGLISH_STOP_WORDS
 stop = set(ENGLISH_STOP_WORDS) | {"jamal", "page", "case", "study", "section", "ve", "don", "isn", "doesn", "didn", "wasn", "won", "ll", "s", "t",
@@ -182,6 +202,7 @@ out = {
         "checks": {"trustworthiness_k10": round(trust, 3), "neighbour_preservation_k10": round(preserve, 3),
                    "umap_seed_overlap": seed_overlap, "leiden_sensitivity": stability},
         "corpus_sha256_16": corpus_hash,
+        "alignment": aligned or {"to_previous": False},
         "versions": {"sentence_transformers": sentence_transformers.__version__, "umap": umap.__version__, "sklearn": sklearn.__version__,
                      "leidenalg": la.version, "torch": torch.__version__, "python": platform.python_version()},
     },

@@ -22,7 +22,7 @@ into ~200-token chunks and averaging them weighted by length. On the full
 - keeps mutual 5-nearest-neighbour pairs as the solid lines
 - names each cluster with c-TF-IDF on length-normalised counts
 
-UMAP projects to 2-D for display only. Seeds are fixed, so the same content
+UMAP projects to 2-D for display only, and each run is rotated (or reflected) to line up with the previous `ml.json`, so editing a sentence doesn't flip the whole map. Seeds are fixed, so the same content
 gives the same map. The method was reviewed with GPT-6.1 Sol. The page's "How
 this map was made" card shows the parameters and the quality checks.
 
